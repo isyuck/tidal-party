@@ -10,7 +10,7 @@ const tmi = require('tmi.js');
 const opts = {
   identity: {
     username: "botforctrlav",
-    password: "oauth:6zxkq26dbt8w5tdjymvsu1q3ew8mki"
+    password: "oauth:<insert oauth here>"
   },
   channels: [
     "ctrlav"
