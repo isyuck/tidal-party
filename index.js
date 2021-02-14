@@ -3,17 +3,20 @@
 // let socket;
 // var io = require('socket.io')(8081);
 const osc = require('node-osc');
-const client = new osc.Client('127.0.0.1', 3333);
+const oscClient = new osc.Client('127.0.0.1', 6060);
 const tmi = require('tmi.js');
+let connections = [];
+const maxActiveConnections = 4;
+const oscAddr = "/ctrl"
 
-// Define configuration options
+// Define twitch configuration options
 const opts = {
   identity: {
-    username: "botforctrlav",
-    password: "oauth:<insert oauth here>"
+    username: "tobtes", // test account
+    password: "oauth:jnw6gcu3xw0okg91xfekw2w894vjh1",
   },
   channels: [
-    "ctrlav"
+    "isyuck"
   ]
 };
 
@@ -30,55 +33,92 @@ const commands = {
 }
 
 // Create a client with our options
-const client2 = new tmi.client(opts);
+const twitchClient = new tmi.client(opts);
 
 // Register our event handlers (defined below)
-client2.on('message', onMessageHandler);
-client2.on('connected', onConnectedHandler);
+twitchClient.on('message', onMessageHandler);
+twitchClient.on('connected', onConnectedHandler);
 
 // Connect to Twitch:
-client2.connect();
+twitchClient.connect();
+
+function handleOsc(msg, username) {
+
+  if (msg === "!osc") { return "error: pattern empty, maybe try !osc \"bd sn cp hh\" ?" }
+
+  let m;
+
+  // get text between quotes
+  let match = msg.match(/"(.*?)"/)
+  if (match) {
+    m = match[1] // get first match, `!osc "bd" "cp"` will become `"bd"`
+  } else {
+    // there wasn't a match, suggest putting msg in quotes
+    return `error: pattern parsing failed, maybe try !osc \"${msg.replace(/\"/g, "")}\" ?`
+  }
+
+  if (!m) { return "error: pattern empty, maybe try !osc \"bd sn cp hh\"" }
+
+  if (!connections.length) { 
+    // if there are no connections just add the user's pattern
+    connections.push({username: username, pattern: m})
+  } else if (connections.length < maxActiveConnections){
+    for (c of connections) {
+      // if the user already has a connection
+      if (c.username === username) {
+        c.pattern = m
+      } else {
+        connections.push({username: username, pattern: m})
+      }
+    }
+  } else {
+    // remove last sent connection and replace with the new one
+    connections.push({username: username, pattern: m})
+    connections.shift()
+  }
+
+  // update all connections
+  for ([i, c] of connections.entries()) {
+    c.index = i;
+    oscClient.send(oscAddr, "p" + String(i), c.pattern)
+  }
+
+  // console.log(connections)
+
+  return `pattern "${m}" from ${username} sent`
+}
+
 
 // Called every time a message comes in
 function onMessageHandler (target, context, msg, self) {
   if (self) { return; } // Ignore messages from the bot
 
-  let pattern;
-
-if (msg.includes('\"')){
-  let firstQuote = msg.indexOf('\"') + 1;
-  let secondQuote = msg.lastIndexOf('\"')
-   pattern = msg.substring(firstQuote, secondQuote);
-}
-  
-if (msg.includes("osc")) {msg = '!osc'};
-  // Remove whitespace from chat message
-  const commandName = msg.trim();
+  // get first 'word' (all chars until whitespace)
+  const commandName = msg.split(' ')[0]
 
   switch(commandName) {
     case '!today':
-      client2.say(target, `Today's topic is ${commands.today}`);
+      twitchClient.say(target, `Today's topic is ${commands.today}`);
       console.log(`ran ${commandName}`);
       break;
     case '!commands':
-      client2.say(target, `Available commands are ${commands.commands()}`)
+      twitchClient.say(target, `Available commands are ${commands.commands()}`);
       console.log(`ran ${commandName}`);
       break;
     case '!about':
-      client2.say(target, commands.about)
+      twitchClient.say(target, commands.about);
       console.log(`ran ${commandName}`);
       break;
     case '!schedule':
-      client2.say(target, commands.schedule)
+      twitchClient.say(target, commands.schedule);
       console.log(`ran ${commandName}`);
       break;
     case '!zork':
-      client2.say(target, commands.zork)
+      twitchClient.say(target, commands.zork);
       break;
     case "!osc":
-      client2.say(target, commands.osc);
-      client.send('/oscAddress', pattern, () => {
-      });
+      const result = handleOsc(msg.substr(msg.indexOf(" ") + 1), context.username);
+      twitchClient.say(target, result);
       break;
     default:
       console.log("Not a recognized command");
