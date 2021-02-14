@@ -46,53 +46,62 @@ function handleOsc(msg, username) {
 
   if (msg === "!osc") { return "error: pattern empty, maybe try !osc \"bd sn cp hh\" ?" }
 
-  // TODO !osc silence
+  if (msg === "silence") {
 
-  let current = ({pattern: "", effects:{}});
-
-  // get text between quotes
-  let match = msg.match(/"(.*?)"/)
-  if (match) {
-    current.pattern = match[1] // get first match, `!osc "bd" "cp"` will become `"bd"`
-  } else {
-    // there wasn't a match, suggest putting msg in quotes
-    return `error: pattern parsing failed, maybe try !osc \"${msg.replace(/\"/g, "")}\" ?`
-  }
-
-  if (!current.pattern) { return "error: pattern empty, maybe try !osc \"bd sn cp hh\"" }
-
-  if (msg.match(/#/g)) {
-    const effect = msg.split('# ')
-    let effects = [];
-    for (const e of effect) {
-      const effectPair = e.split(' ').filter(function(el) {return el})
-      if (effectPair[0].replace(/"/g, "") != current.pattern) {
-        effects.push(effectPair)
-      }
-    }
-    current.effects = effects;
-  }
-
-  console.log(current)
-
-  if (!connections.length) { 
-    // if there are no connections just add the user's pattern
-    connections.push({username: username, pattern: current.pattern, effects: current.effects})
-  } else if (connections.length < maxActiveConnections){
-    for (c of connections) {
-      // if the user already has a connection
+    for ([i, c] of connections.entries()) {
       if (c.username === username) {
-        c.pattern = current.pattern
-        c.effects = current.effects
-      } else {
-        connections.push({username: username, pattern: current.pattern, effects: current.effects})
+        oscClient.send(oscAddr, "p" + i, "")
+        return `silenced ${username}'s pattern`;
       }
     }
+
   } else {
-    // remove last sent connection and replace with the new one
-    connections.push({username: username, pattern: current.pattern, effects: current.effects})
-    connections.shift()
-  }
+
+    let current = ({pattern: "", effects:{name: "", pattern: ""}});
+
+    // get the first pattern
+    let match = msg.match(/"(.*?)"/)
+    if (match) {
+      current.pattern = match[1]
+    } else {
+      return ""
+    }
+
+    if (!current.pattern) { return "error: pattern empty, maybe try !osc \"bd sn cp hh\"" }
+
+    if (msg.match(/#/g)) {
+      const effectPairs = msg.split('# ')
+      let effects = []
+      effectPairs.shift() // remove first pattern
+      for (pair of effectPairs) {
+        pair = pair.split(' ')
+        const name = pair.shift()
+        const pat  = pair.join(" ").replace(/"/g, "")
+        effects.push({name: name, pattern: pat})
+      }
+      current.effects = effects;
+    }
+
+    console.log(current)
+
+    if (!connections.length) { 
+      // if there are no connections just add the user's pattern
+      connections.push({username: username, pattern: current.pattern, effects: current.effects})
+    } else if (connections.length < maxActiveConnections){
+      for (c of connections) {
+        // if the user already has a connection
+        if (c.username === username) {
+          c.pattern = current.pattern
+          c.effects = current.effects
+        } else {
+          connections.push({username: username, pattern: current.pattern, effects: current.effects})
+        }
+      }
+    } else {
+      // remove last sent connection and replace with the new one
+      connections.push({username: username, pattern: current.pattern, effects: current.effects})
+      connections.shift()
+    }
 
   // update all connections
   for ([i, c] of connections.entries()) {
@@ -100,14 +109,15 @@ function handleOsc(msg, username) {
     oscClient.send(oscAddr, "p" + String(i), c.pattern)
     if (c.effects.length) {
       for (const e of c.effects) {
-        oscClient.send(oscAddr, "p" + i + "-" + e[0], parseFloat(e[1]))
+        oscClient.send(oscAddr, "p" + i + "-" + e.name, e.pattern)
       }
     }
   }
-
-  // console.log(connections)
+  console.log(connections)
 
   return `pattern "${current.pattern}" from ${username} sent`
+  }
+  return "";
 }
 
 
