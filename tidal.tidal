@@ -1,0 +1,5 @@
+hush
+
+d1 $ s (cP "p0")
+  # gain (cF 1 "p0-gain")
+  # distort (cF 0 "p0-distort")
