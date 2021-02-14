@@ -46,34 +46,51 @@ function handleOsc(msg, username) {
 
   if (msg === "!osc") { return "error: pattern empty, maybe try !osc \"bd sn cp hh\" ?" }
 
-  let m;
+  // TODO !osc silence
+
+  let current = ({pattern: "", effects:{}});
 
   // get text between quotes
   let match = msg.match(/"(.*?)"/)
   if (match) {
-    m = match[1] // get first match, `!osc "bd" "cp"` will become `"bd"`
+    current.pattern = match[1] // get first match, `!osc "bd" "cp"` will become `"bd"`
   } else {
     // there wasn't a match, suggest putting msg in quotes
     return `error: pattern parsing failed, maybe try !osc \"${msg.replace(/\"/g, "")}\" ?`
   }
 
-  if (!m) { return "error: pattern empty, maybe try !osc \"bd sn cp hh\"" }
+  if (!current.pattern) { return "error: pattern empty, maybe try !osc \"bd sn cp hh\"" }
+
+  if (msg.match(/#/g)) {
+    const effect = msg.split('# ')
+    let effects = [];
+    for (const e of effect) {
+      const effectPair = e.split(' ').filter(function(el) {return el})
+      if (effectPair[0].replace(/"/g, "") != current.pattern) {
+        effects.push(effectPair)
+      }
+    }
+    current.effects = effects;
+  }
+
+  console.log(current)
 
   if (!connections.length) { 
     // if there are no connections just add the user's pattern
-    connections.push({username: username, pattern: m})
+    connections.push({username: username, pattern: current.pattern, effects: current.effects})
   } else if (connections.length < maxActiveConnections){
     for (c of connections) {
       // if the user already has a connection
       if (c.username === username) {
-        c.pattern = m
+        c.pattern = current.pattern
+        c.effects = current.effects
       } else {
-        connections.push({username: username, pattern: m})
+        connections.push({username: username, pattern: current.pattern, effects: current.effects})
       }
     }
   } else {
     // remove last sent connection and replace with the new one
-    connections.push({username: username, pattern: m})
+    connections.push({username: username, pattern: current.pattern, effects: current.effects})
     connections.shift()
   }
 
@@ -81,11 +98,16 @@ function handleOsc(msg, username) {
   for ([i, c] of connections.entries()) {
     c.index = i;
     oscClient.send(oscAddr, "p" + String(i), c.pattern)
+    if (c.effects.length) {
+      for (const e of c.effects) {
+        oscClient.send(oscAddr, "p" + i + "-" + e[0], parseFloat(e[1]))
+      }
+    }
   }
 
   // console.log(connections)
 
-  return `pattern "${m}" from ${username} sent`
+  return `pattern "${current.pattern}" from ${username} sent`
 }
 
 
