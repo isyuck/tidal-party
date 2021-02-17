@@ -5,9 +5,9 @@
 const osc = require('node-osc');
 const oscClient = new osc.Client('127.0.0.1', 6060);
 const tmi = require('tmi.js');
-let connections = [];
 const maxActiveConnections = 4;
 const oscAddr = "/ctrl"
+const effectsList = require("./effects.json")
 
 // Define twitch configuration options
 const opts = {
@@ -29,7 +29,6 @@ const commands = {
     },
   schedule: "The livestream schedule is 8-10pm EST (+5 UTC) on Thursdays, but the topics have not been decided yet",
   zork: "West of House This is an open field west of a white house, with a boarded front door. There is a small mailbox here. A rubber mat saying 'Welcome to Zork!' lies by the door.",
-  osc: "sending osc message"
 }
 
 // Create a client with our options
@@ -42,82 +41,134 @@ twitchClient.on('connected', onConnectedHandler);
 // Connect to Twitch:
 twitchClient.connect();
 
-function handleOsc(msg, username) {
+let connections = []
 
-  if (msg === "!osc") { return "error: pattern empty, maybe try !osc \"bd sn cp hh\" ?" }
+function parseMessage(msg) {
+  let current = ({pattern: "", effects:{name: "", pattern: ""}});
 
-  if (msg === "silence") {
+  let match = msg.match(/"(.*?)"/)
+  current.pattern = match[1]
 
-    for ([i, c] of connections.entries()) {
-      if (c.username === username) {
-        oscClient.send(oscAddr, "p" + i, "")
-        return `silenced ${username}'s pattern`;
-      }
-    }
+  const effectPairs = msg.split('# ')
+  let effects = []
+  effectPairs.shift() // remove first pattern
+  for (pair of effectPairs) {
+    pair = pair.split(' ')
+    const name = pair.shift()
+    const pat = pair.join(" ").replace(/"/g, "").trim()
+    effects.push({name: name, pattern: pat})
+  }
+  current.effects = effects;
 
-  } else {
+  return current
+}
 
-    let current = ({pattern: "", effects:{name: "", pattern: ""}});
+function handleNewMessage(msg, username) {
 
-    // get the first pattern
-    let match = msg.match(/"(.*?)"/)
-    if (match) {
-      current.pattern = match[1]
-    } else {
-      return ""
-    }
 
-    if (!current.pattern) { return "error: pattern empty, maybe try !osc \"bd sn cp hh\"" }
+  try {
+    // common messages
+       // empty
+    if (msg === "!t" || msg === "" || msg === " " || msg === "\"\"" || !msg) { return `error: pattern from ${username} empty, maybe try !t \"bd sn cp hh\" ?` }
+       // single quote
+    if (msg === "\"") { return `error: could not parse pattern ${msg} from ${username}` }
+       // help
+    if (msg === "help") {return `usage: !t \"pattern\" | example: !t \"bd sn cp hh\" | !osc silence`}
 
-    if (msg.match(/#/g)) {
-      const effectPairs = msg.split('# ')
-      let effects = []
-      effectPairs.shift() // remove first pattern
-      for (pair of effectPairs) {
-        pair = pair.split(' ')
-        const name = pair.shift()
-        const pat  = pair.join(" ").replace(/"/g, "")
-        effects.push({name: name, pattern: pat})
-      }
-      current.effects = effects;
-    }
-
-    console.log(current)
-
-    if (!connections.length) { 
-      // if there are no connections just add the user's pattern
-      connections.push({username: username, pattern: current.pattern, effects: current.effects})
-    } else if (connections.length < maxActiveConnections){
-      for (c of connections) {
-        // if the user already has a connection
-        if (c.username === username) {
-          c.pattern = current.pattern
-          c.effects = current.effects
-        } else {
-          connections.push({username: username, pattern: current.pattern, effects: current.effects})
+       // silence user's pattern
+    console.log(msg)
+    if (msg === "silence") {
+      for ([i, connection] of connections.entries()) {
+        if (connection.user === username) {
+          oscClient.send(oscAddr, "p" + i, "")
+          connections.splice(i, 1)
+          return `silenced ${username}'s pattern`;
         }
       }
-    } else {
+    }
+
+    // replace other double quotes with ""
+    msg = msg.replace(/”|“/g, "\"") //
+
+    const parsed = parseMessage(msg)
+    let current = ({user: username, pattern: parsed.pattern, effects: parsed.effects})
+
+    if (connections.length === 0) { 
+      // if there are no connections just add the new connection
+      connections.push(current)
+    } else if (connections.length < maxActiveConnections){
+      let match = false;
+      for (connection of connections) {
+        // if the user already has a connection
+        if (connection.user === current.user) {
+          Object.assign(connection, current)
+          match = true;
+          break;
+        }
+      }
+      if (!match) { connections.push(current) }
+    } else if (connections.length === maxActiveConnections) {
       // remove last sent connection and replace with the new one
-      connections.push({username: username, pattern: current.pattern, effects: current.effects})
+      connections.push(current)
       connections.shift()
     }
 
-  // update all connections
-  for ([i, c] of connections.entries()) {
-    c.index = i;
-    oscClient.send(oscAddr, "p" + String(i), c.pattern)
-    if (c.effects.length) {
-      for (const e of c.effects) {
-        oscClient.send(oscAddr, "p" + i + "-" + e.name, e.pattern)
+    // prep osc messages
+    let messages = []
+    for ([i, connection] of connections.entries()) {
+      let patternMsg = new osc.Message(oscAddr) // for 's'
+      patternMsg.append(`p${i}`)
+      patternMsg.append(connection.pattern)
+
+      // update local effects list with values from connection
+      let localEffectsList = JSON.parse(JSON.stringify(effectsList))
+      for (listEffect of localEffectsList) {
+        for (const connectionEffect of connection.effects) {
+          if (connectionEffect.name === listEffect.name) {
+            listEffect.pattern = connectionEffect.pattern
+          }
+        }
+      }
+
+      let effectMsgs = []
+
+      for (const listEffect of localEffectsList) {
+        let effectMsg = new osc.Message(oscAddr)  // for gain, speed etc
+        effectMsg.append(`p${i}-${listEffect.name}`)
+        effectMsg.append(listEffect.pattern)
+        effectMsgs.push(effectMsg)
+      }
+
+      messages.push({pattern: patternMsg, effects: effectMsgs})
+    }
+
+
+    // send osc messages
+    for (const message of messages) {
+      oscClient.send(message.pattern ,() => {});
+      if (message.effects.length) {
+        for (const me of message.effects)
+        oscClient.send(me, () => {});
       }
     }
-  }
-  console.log(connections)
 
-  return `pattern "${current.pattern}" from ${username} sent`
+    console.clear()
+    console.log(`active patterns ${connections.length}`)
+    for ([i, connection] of connections.entries()) {
+      console.log(i, connection)
+    }
+
+    return `pattern "${current.pattern}" from ${current.user} sent`
+  } catch (err) {
+    console.log(err)
+    return `${err.name} in message from ${username}, try checking your syntax?`
   }
-  return "";
+
+  try {
+    return `unknown error! try checking your syntax, ${username}`
+  } catch (err) {
+    return `unknown error! check your syntax?`
+  }
 }
 
 
@@ -148,8 +199,8 @@ function onMessageHandler (target, context, msg, self) {
     case '!zork':
       twitchClient.say(target, commands.zork);
       break;
-    case "!osc":
-      const result = handleOsc(msg.substr(msg.indexOf(" ") + 1), context.username);
+    case "!t":
+      const result = handleNewMessage(msg.substr(msg.indexOf(" ") + 1), context.username);
       twitchClient.say(target, result);
       break;
     default:
