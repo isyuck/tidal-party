@@ -43,6 +43,15 @@ twitchClient.connect();
 
 let connections = []
 
+function updateOutput() {
+    console.clear()
+    console.log(`${connections.length} active patterns`)
+    for ([i, connection] of connections.entries()) {
+      console.log(i, connection)
+    }
+
+}
+
 function parseMessage(msg) {
   let current = ({pattern: "", effects:{name: "", pattern: ""}});
 
@@ -76,18 +85,18 @@ function handleNewMessage(msg, username) {
     if (msg === "help") {return `usage: !t \"pattern\" | example: !t \"bd sn cp hh\" | !osc silence`}
 
        // silence user's pattern
-    console.log(msg)
     if (msg === "silence") {
       for ([i, connection] of connections.entries()) {
         if (connection.user === username) {
           oscClient.send(oscAddr, "p" + i, "")
           connections.splice(i, 1)
+          updateOutput()
           return `silenced ${username}'s pattern`;
         }
       }
     }
 
-    // replace other double quotes with ""
+    // replace other double quotes with "" (related to mobile)
     msg = msg.replace(/”|“/g, "\"") //
 
     const parsed = parseMessage(msg)
@@ -152,11 +161,7 @@ function handleNewMessage(msg, username) {
       }
     }
 
-    console.clear()
-    console.log(`active patterns ${connections.length}`)
-    for ([i, connection] of connections.entries()) {
-      console.log(i, connection)
-    }
+    updateOutput()
 
     return `pattern "${current.pattern}" from ${current.user} sent`
   } catch (err) {
