@@ -8,6 +8,7 @@ const tmi = require('tmi.js');
 const maxActiveConnections = 4;
 const oscAddr = "/ctrl"
 const effectsList = require("./effects.json")
+const ui = require("./ui.js")
 
 // Define twitch configuration options
 const opts = {
@@ -41,15 +42,14 @@ twitchClient.on('connected', onConnectedHandler);
 // Connect to Twitch:
 twitchClient.connect();
 
+ui.render();
+
 let connections = []
 
 function updateOutput() {
-    console.clear()
-    console.log(`${connections.length} active patterns`)
-    for ([i, connection] of connections.entries()) {
-      console.log(i, connection)
-    }
-
+  for ([i, connection] of connections.entries()) {
+    ui.addConnection(i, connection)
+  }
 }
 
 function parseMessage(msg) {
@@ -165,7 +165,6 @@ function handleNewMessage(msg, username) {
 
     return `pattern "${current.pattern}" from ${current.user} sent`
   } catch (err) {
-    console.log(err)
     return `${err.name} in message from ${username}, try checking your syntax?`
   }
 
@@ -187,19 +186,15 @@ function onMessageHandler (target, context, msg, self) {
   switch(commandName) {
     case '!today':
       twitchClient.say(target, `Today's topic is ${commands.today}`);
-      console.log(`ran ${commandName}`);
       break;
     case '!commands':
       twitchClient.say(target, `Available commands are ${commands.commands()}`);
-      console.log(`ran ${commandName}`);
       break;
     case '!about':
       twitchClient.say(target, commands.about);
-      console.log(`ran ${commandName}`);
       break;
     case '!schedule':
       twitchClient.say(target, commands.schedule);
-      console.log(`ran ${commandName}`);
       break;
     case '!zork':
       twitchClient.say(target, commands.zork);
@@ -209,10 +204,9 @@ function onMessageHandler (target, context, msg, self) {
       twitchClient.say(target, result);
       break;
     default:
-      console.log("Not a recognized command");
   }
 }
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler (addr, port) {
-  console.log(`* Connected to ${addr}:${port}`);
+  ui.onTwitchConnected(addr, port)
 }
