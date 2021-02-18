@@ -14,7 +14,7 @@ Twitch Message | Tidal Equivalent
 
 In practice, you can think of `!t x` as shorthand for Tidal's `d1 $ s x`.
 
-Most SuperDirt effects work within tidal-twitch, and full a list of working effects can be found in [effects.json](https://github.com/isyuck/tidal-twitch/blob/main/effects.json). While Tidal's mini-notation works fully, no functions are yet available.
+Most SuperDirt effects work within twitch-tidal, and full a list of working effects can be found in [effects.json](https://github.com/isyuck/twitch-tidal/blob/main/effects.json). While Tidal's mini-notation works fully, no functions are yet available.
 
 Patterns are kept on a time based stack and are associated with users. There is a (configurable, maybe one day dynamic?) maximum number of patterns that can be active at any one time. When a user sends a new pattern to the chat, their currently active (old) pattern will be replaced by their new pattern. If they don't have any active patterns, the *oldest* pattern on the stack will be replaced, regardless of who it belonged to. As new patterns replace old patterns, new groups of patterns will form over time.
 
@@ -29,7 +29,7 @@ twitch-tidal doesn't intend to be a twitch based [estuary](https://github.com/dk
 twitch-tidal should work on all major OS's. You will need, in no particular order:
 
 - A twitch channel to stream to
-- A *seperate* account for tidal-twitch to use as a bot
+- A *seperate* account for twitch-tidal to use as a bot
 - People who want to make music
 - [node.js](https://nodejs.org/en/)
 - [TidalCycles](https://tidalcycles.org/Welcome)
