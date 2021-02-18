@@ -5,12 +5,12 @@ const effectsList = require("./effects.json");
 // packages
 const osc = require("node-osc");
 const oscClient = new osc.Client(config.network.host, config.network.port);
-const oscAddr = config.address;
+const oscAddr = config.network.address;
 const tmi = require("tmi.js");
 
 let connections = [];
 
-const twitchClient = new tmi.client(config.network.twitch);
+const twitchClient = new tmi.client(config.twitch);
 twitchClient.on('message', onMessageHandler);
 twitchClient.on('connected', onConnectedHandler);
 twitchClient.connect();
@@ -54,6 +54,7 @@ function handleNewMessage(msg, username) {
        // help
     if (msg === "help") {return `usage: !t \"pattern\" | example: !t \"bd sn cp hh\" | !osc silence`}
 
+
        // silence user's pattern
     if (msg === "silence") {
       for ([i, connection] of connections.entries()) {
@@ -68,6 +69,7 @@ function handleNewMessage(msg, username) {
 
     // replace other double quotes with "" (related to mobile)
     msg = msg.replace(/”|“/g, "\"") //
+
 
     const parsed = parseMessage(msg)
     let current = ({user: username, pattern: parsed.pattern, effects: parsed.effects})
@@ -91,6 +93,7 @@ function handleNewMessage(msg, username) {
       connections.push(current)
       connections.shift()
     }
+
 
     // prep osc messages
     let messages = []
