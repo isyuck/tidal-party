@@ -1,52 +1,34 @@
-// client id guusv7otlopu3dlprk9tpoijs6hf4j
-
-// let socket;
-// var io = require('socket.io')(8081);
 const osc = require('node-osc');
 const oscClient = new osc.Client('127.0.0.1', 6060);
 const tmi = require('tmi.js');
-const maxActiveConnections = 4;
+const maxActiveConnections = 4; // pattern limit
 const oscAddr = "/ctrl"
 const effectsList = require("./effects.json")
 const ui = require("./ui.js")
 
-// Define twitch configuration options
+// twitch configuration
 const opts = {
   identity: {
-    username: "tobtes", // test account
-    password: "oauth:jnw6gcu3xw0okg91xfekw2w894vjh1",
+    username: "YOUR_BOT_ACCOUNT",
+    password: "YOUR_TWITCH_OAUTH",
   },
   channels: [
-    "isyuck"
+    "YOUR_CHANNEL_NAME"
   ]
 };
 
-const commands = {
-  about: "ctrlAV is an ecosystem for audiovisual performers and their audiences to try new things and brainstorm for a new tomorrow",
-  today: "Kickoff Talk",
-  commands: () => {
-    return Object.keys(commands)
-      .map((command) => " !" + command)
-    },
-  schedule: "The livestream schedule is 8-10pm EST (+5 UTC) on Thursdays, but the topics have not been decided yet",
-  zork: "West of House This is an open field west of a white house, with a boarded front door. There is a small mailbox here. A rubber mat saying 'Welcome to Zork!' lies by the door.",
-}
-
-// Create a client with our options
 const twitchClient = new tmi.client(opts);
 
-// Register our event handlers (defined below)
 twitchClient.on('message', onMessageHandler);
 twitchClient.on('connected', onConnectedHandler);
 
-// Connect to Twitch:
 twitchClient.connect();
 
 ui.render();
 
 let connections = []
 
-function updateOutput() {
+function updateUI() {
   for ([i, connection] of connections.entries()) {
     ui.addConnection(i, connection)
   }
@@ -90,7 +72,7 @@ function handleNewMessage(msg, username) {
         if (connection.user === username) {
           oscClient.send(oscAddr, "p" + i, "")
           connections.splice(i, 1)
-          updateOutput()
+          updateUI()
           return `silenced ${username}'s pattern`;
         }
       }
@@ -161,7 +143,7 @@ function handleNewMessage(msg, username) {
       }
     }
 
-    updateOutput()
+    updateUI()
 
     return `pattern "${current.pattern}" from ${current.user} sent`
   } catch (err) {
@@ -175,38 +157,20 @@ function handleNewMessage(msg, username) {
   }
 }
 
-
-// Called every time a message comes in
 function onMessageHandler (target, context, msg, self) {
-  if (self) { return; } // Ignore messages from the bot
+  if (self) { return; } // ignore messages from the bot
 
   // get first 'word' (all chars until whitespace)
   const commandName = msg.split(' ')[0]
 
   switch(commandName) {
-    case '!today':
-      twitchClient.say(target, `Today's topic is ${commands.today}`);
-      break;
-    case '!commands':
-      twitchClient.say(target, `Available commands are ${commands.commands()}`);
-      break;
-    case '!about':
-      twitchClient.say(target, commands.about);
-      break;
-    case '!schedule':
-      twitchClient.say(target, commands.schedule);
-      break;
-    case '!zork':
-      twitchClient.say(target, commands.zork);
-      break;
     case "!t":
       const result = handleNewMessage(msg.substr(msg.indexOf(" ") + 1), context.username);
       twitchClient.say(target, result);
       break;
-    default:
   }
 }
-// Called every time the bot connects to Twitch chat
+
 function onConnectedHandler (addr, port) {
   ui.onTwitchConnected(addr, port)
 }
