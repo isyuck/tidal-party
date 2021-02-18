@@ -1,32 +1,21 @@
-const osc = require('node-osc');
-const oscClient = new osc.Client('127.0.0.1', 6060);
-const tmi = require('tmi.js');
-const maxActiveConnections = 4; // pattern limit
-const oscAddr = "/ctrl"
-const effectsList = require("./effects.json")
-const ui = require("./ui.js")
+// local
+const config = require("./config.js");
+const ui = require("./ui.js");
+const effectsList = require("./effects.json");
+// packages
+const osc = require("node-osc");
+const oscClient = new osc.Client(config.network.host, config.network.port);
+const oscAddr = config.address;
+const tmi = require("tmi.js");
 
-// twitch configuration
-const opts = {
-  identity: {
-    username: "YOUR_BOT_ACCOUNT",
-    password: "YOUR_TWITCH_OAUTH",
-  },
-  channels: [
-    "YOUR_CHANNEL_NAME"
-  ]
-};
+let connections = [];
 
-const twitchClient = new tmi.client(opts);
-
+const twitchClient = new tmi.client(config.network.twitch);
 twitchClient.on('message', onMessageHandler);
 twitchClient.on('connected', onConnectedHandler);
-
 twitchClient.connect();
 
 ui.render();
-
-let connections = []
 
 function updateUI() {
   for ([i, connection] of connections.entries()) {
@@ -55,7 +44,6 @@ function parseMessage(msg) {
 }
 
 function handleNewMessage(msg, username) {
-
 
   try {
     // common messages
@@ -87,7 +75,7 @@ function handleNewMessage(msg, username) {
     if (connections.length === 0) { 
       // if there are no connections just add the new connection
       connections.push(current)
-    } else if (connections.length < maxActiveConnections){
+    } else if (connections.length < config.maxActivePatterns){
       let match = false;
       for (connection of connections) {
         // if the user already has a connection
@@ -98,7 +86,7 @@ function handleNewMessage(msg, username) {
         }
       }
       if (!match) { connections.push(current) }
-    } else if (connections.length === maxActiveConnections) {
+    } else if (connections.length === config.maxActivePatterns) {
       // remove last sent connection and replace with the new one
       connections.push(current)
       connections.shift()
@@ -148,12 +136,6 @@ function handleNewMessage(msg, username) {
     return `pattern "${current.pattern}" from ${current.user} sent`
   } catch (err) {
     return `${err.name} in message from ${username}, try checking your syntax?`
-  }
-
-  try {
-    return `unknown error! try checking your syntax, ${username}`
-  } catch (err) {
-    return `unknown error! check your syntax?`
   }
 }
 
