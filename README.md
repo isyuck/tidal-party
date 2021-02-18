@@ -77,7 +77,7 @@ After this you have to install the packages twitch-tidal uses. Do this by runnin
 
 ### Config
 
-Next, you need to configure tidal-twitch to your channel. Replace `username` and `password` in `config.js` to
+Next, you need to configure twitch-tidal to your channel. Replace `username` and `password` in `config.js` to
 the username and password/OAUTH of your bot account. Then change `channels` to the channel name of the *different* account
 hosting the stream. You can also change `maxActivePatterns` if you want to have more/less patterns active at once.
 
