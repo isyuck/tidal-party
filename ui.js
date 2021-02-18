@@ -2,7 +2,6 @@
     
     var blessed = require("blessed");
 
-    // Create a screen object.
     var screen = blessed.screen({
         smartCSR: true,
         dockBorders: true
@@ -10,7 +9,7 @@
 
     screen.title = "tidal-twitch"
 
-    // Create a box perfectly centered horizontally and vertically.
+    // main area
     var box = blessed.box({
         top: "center",
         left: "center",
@@ -28,6 +27,7 @@
         tags: true,
         content: "{inverse} tidal-twitch {/inverse}",
     })
+
     var infoTitle = blessed.text({
         width: "40%",
         left: "60%",
@@ -36,6 +36,8 @@
         align: "right",
         height: 1,
     })
+
+    // where active patterns are displayed
     var patternArea = blessed.box({
         top: 2,
         tags: true,
@@ -43,6 +45,8 @@
         height: "100%-2",
         padding: {left: 1, right: 1},
     })
+
+    // tidal-twitch details and usage
     var infoArea = blessed.box({
         tags: true,
         top: 2,
@@ -52,10 +56,12 @@
         padding: {left: 1, right: 1},
     })
 
+    // exit with 'q' or 'ctrl-c'
     screen.key(["q", "C-c"], function(ch, key) {
         return process.exit(0);
     });
 
+    // TODO some visual indication that we are connected to twitch
     module.exports.onTwitchConnected = function(addr, port) {
         // twitchInfo.style.bg = "green"
         // title.style.bg = "green"
@@ -92,5 +98,4 @@
         box.focus();
         screen.render();
     }
-
 }());
