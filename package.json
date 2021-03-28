@@ -36,7 +36,7 @@
     "blessed": "^0.1.81",
     "http": "0.0.0",
     "node-osc": "^2.0.0",
-    "socket.io": "1.4.5",
+    "socket.io": "^4.0.0",
     "tmi.js": "^1.7.1"
   },
   "keywords": [
