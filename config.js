@@ -13,6 +13,9 @@ const config = {
         address: "/ctrl",
         port: 6060,
     },
+    ghci: {
+        path: "BootTidal.hs"
+    },
     maxActivePatterns: 8,
 };
 
