@@ -73,5 +73,5 @@ let setI = streamSetI tidal
     setB = streamSetB tidal
 :}
 
-:set prompt "tidal> "
+:set prompt "> "
 :set prompt-cont ""
