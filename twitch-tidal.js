@@ -1,10 +1,8 @@
 const config = require("./config.js");
-const PatternHandler = require("./pattern-handler.js");
 const tmi = require("tmi.js");
 const { spawn } = require('child_process');
-
+const PatternHandler = require("./pattern-handler.js");
 const patternHandler = new PatternHandler(config.mode, config.maxActivePatterns);
-
 
 // twitch
 const twitchClient = new tmi.client(config.twitch);
@@ -17,17 +15,19 @@ const tidal = spawn('ghci', ['-ghci-script', config.ghci.path]);
 tidal.stdout.on('data', (data) => { console.log(`tidal ${String(data).trim()}`) });
 tidal.stderr.on('data', (data) => { console.error(`stderr: ${data}`); });
 
-function handleNewMessage(username, msg) {
+function handleNewMessage(user, msg) {
 
-  const connections = patternHandler.updateConnections(username, msg);
+  // get a new list of patterns
+  const patterns = patternHandler.update({
+    user: user, pattern: msg = msg.substr(msg.indexOf(" ") + 1)
+  });
 
-  for ([i, connection] of connections.entries()) {
-    tidal.stdin.write(`d${i + 1} \$ ${connection.pattern}\n`);
+  for ([i, p] of patterns.entries()) {
+    tidal.stdin.write(`d${i + 1} \$ ${p.pattern}\n`);
   }
 
-  console.log(connections);
-
-  return msg;
+  console.log(patterns);
+  return `@${user}: ${msg}`;
 }
 
 function onMessageHandler(target, context, msg, self) {
@@ -35,20 +35,22 @@ function onMessageHandler(target, context, msg, self) {
 
   // get first 'word' (all chars until whitespace)
   const commandName = msg.split(' ')[0]
+  let result = "";
 
   switch (commandName) {
     case "!t":
-      const result = handleNewMessage(context.username, msg);
-      twitchClient.say(target, result);
+      result = handleNewMessage(context.username, msg);
       break;
     // username as argument (for multiuser debug/testing only)
     // e.g. `!u kuhn msg` to pretend to be user 'kuhn'
     case "!u":
       const tmsg = msg.split(' ');
       const user = tmsg.splice(1, 1);
-      handleNewMessage(user.join(' '), tmsg.join(' '));
+      result = handleNewMessage(user.join(' '), tmsg.join(' '));
       break;
   }
+
+  twitchClient.say(target, result);
 }
 
 function onConnectedHandler(addr, port) {
