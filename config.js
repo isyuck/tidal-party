@@ -1,4 +1,4 @@
-const config = {
+module.exports = {
     twitch: {
         identity: {
             username: "YOUR_BOT_ACCOUNT",
@@ -12,6 +12,5 @@ const config = {
         path: "BootTidal.hs"
     },
     maxActivePatterns: 8,
+    algorithm: 0,
 };
-
-module.exports = config;
