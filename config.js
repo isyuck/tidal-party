@@ -8,10 +8,8 @@ const config = {
             "YOUR_CHANNEL_NAME"
         ],
     },
-    network: {
-        host: "127.0.0.1",
-        address: "/ctrl",
-        port: 6060,
+    ghci: {
+        path: "BootTidal.hs"
     },
     maxActivePatterns: 8,
 };
