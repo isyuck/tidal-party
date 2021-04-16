@@ -14,10 +14,7 @@ twitchClient.connect();
 // tidal
 const tidal = spawn('ghci', ['-ghci-script', config.ghci.path]);
 tidal.stdout.on('data', (data) => { console.log(`tidal ${String(data).trim()}`) });
-
-tidal.stderr.on('data', (data) => {
-  console.error(`stderr: ${data}`);
-});
+tidal.stderr.on('data', (data) => { console.error(`stderr: ${data}`);});
 
 // ui.render();
 
@@ -45,10 +42,11 @@ function handleNewMessage(msg, username) {
       }
     }
     if (!match) { connections.push(current) }
+
   } else if (connections.length === config.maxActivePatterns) {
     // remove last sent connection and replace with the new one
-    connections.push(current)
-    connections.shift()
+    connections.push(current);
+    connections.shift();
   }
 
   for ([i, connection] of connections.entries()) {
