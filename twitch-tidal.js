@@ -1,9 +1,10 @@
 const config = require("./config.js");
-// const ui = require("./ui.js");
+const PatternHandler = require("./pattern-handler.js");
 const tmi = require("tmi.js");
 const { spawn } = require('child_process');
 
-let connections = [];
+const patternHandler = new PatternHandler(config.mode, config.maxActivePatterns);
+
 
 // twitch
 const twitchClient = new tmi.client(config.twitch);
@@ -14,40 +15,11 @@ twitchClient.connect();
 // tidal
 const tidal = spawn('ghci', ['-ghci-script', config.ghci.path]);
 tidal.stdout.on('data', (data) => { console.log(`tidal ${String(data).trim()}`) });
-tidal.stderr.on('data', (data) => { console.error(`stderr: ${data}`);});
+tidal.stderr.on('data', (data) => { console.error(`stderr: ${data}`); });
 
-// ui.render();
+function handleNewMessage(username, msg) {
 
-// function updateUI() {
-//   for ([i, connection] of connections.entries()) {
-//     ui.addConnection(i, connection)
-//   }
-// }
-
-function handleNewMessage(msg, username) {
-  // updateUI()
-  msg = msg.substr(msg.indexOf(" ") + 1);
-
-  let current = ({ user: username, pattern: msg });
-
-  if (!connections.length) {
-    connections.push(current);
-  } else if (connections.length < config.maxActivePatterns) {
-    let match = false;
-    for (connection of connections) {
-      if (connection.user === current.user) {
-        Object.assign(connection, current);
-        match = true;
-        break;
-      }
-    }
-    if (!match) { connections.push(current) }
-
-  } else if (connections.length === config.maxActivePatterns) {
-    // remove last sent connection and replace with the new one
-    connections.push(current);
-    connections.shift();
-  }
+  const connections = patternHandler.updateConnections(username, msg);
 
   for ([i, connection] of connections.entries()) {
     tidal.stdin.write(`d${i + 1} \$ ${connection.pattern}\n`);
@@ -58,28 +30,27 @@ function handleNewMessage(msg, username) {
   return msg;
 }
 
-function onMessageHandler (target, context, msg, self) {
+function onMessageHandler(target, context, msg, self) {
   if (self) { return; } // ignore messages from the bot
 
   // get first 'word' (all chars until whitespace)
   const commandName = msg.split(' ')[0]
 
-  switch(commandName) {
+  switch (commandName) {
     case "!t":
-      const result = handleNewMessage(msg, context.username);
+      const result = handleNewMessage(context.username, msg);
       twitchClient.say(target, result);
       break;
-      // username as argument (for multiuser debug/testing only)
-      // e.g. `!u kuhn msg` to pretend to be user 'kuhn'
+    // username as argument (for multiuser debug/testing only)
+    // e.g. `!u kuhn msg` to pretend to be user 'kuhn'
     case "!u":
       const tmsg = msg.split(' ');
       const user = tmsg.splice(1, 1);
-      handleNewMessage(tmsg.join(' '), user.join(' '));
+      handleNewMessage(user.join(' '), tmsg.join(' '));
       break;
   }
 }
 
-function onConnectedHandler (addr, port) {
-  // ui.onTwitchConnected(addr, port)
+function onConnectedHandler(addr, port) {
   console.log(`connected on ${addr}:${port}`);
 }
