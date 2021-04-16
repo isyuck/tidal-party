@@ -1,8 +1,10 @@
 const config = require("./config.js");
 const tmi = require("tmi.js");
 const { spawn } = require('child_process');
-const PatternHandler = require("./pattern-handler.js");
-const patternHandler = new PatternHandler(config.mode, config.maxActivePatterns);
+const algorithms = require("./algorithms.js");
+
+// the list of all active patterns
+let patterns = [];
 
 // twitch
 const twitchClient = new tmi.client(config.twitch);
@@ -17,17 +19,25 @@ tidal.stderr.on('data', (data) => { console.error(`stderr: ${data}`); });
 
 function handleNewMessage(user, msg) {
 
-  // get a new list of patterns
-  const patterns = patternHandler.update({
-    user: user, pattern: msg = msg.substr(msg.indexOf(" ") + 1)
-  });
+  // parse twitch message into object
+  const latest = ({ user: user, pattern: msg = msg.substr(msg.indexOf(" ") + 1) });
 
-  for ([i, p] of patterns.entries()) {
-    tidal.stdin.write(`d${i + 1} \$ ${p.pattern}\n`);
+  // don't use an algo that doesn't exist
+  if (config.algorithm < algorithms.length) {
+    // use an algorithm to update the list of active patterns
+    patterns = algorithms[config.algorithm](latest, patterns, config.maxActivePatterns);
+
+    // send patterns to tidal
+    for ([i, p] of patterns.entries()) {
+      tidal.stdin.write(`d${i + 1} \$ ${p.pattern}\n`);
+    }
+
+    console.log(patterns);
+    return `@${user}: ${msg}`;
+  } else {
+    console.log(`no algorithm at index ${config.algorithm}, try a number less than ${algorithms.length}`);
   }
-
-  console.log(patterns);
-  return `@${user}: ${msg}`;
+  return "";
 }
 
 function onMessageHandler(target, context, msg, self) {
