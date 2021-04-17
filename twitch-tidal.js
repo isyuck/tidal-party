@@ -45,9 +45,7 @@ function handlePattern(user, msg) {
     console.log(patterns);
     return `@${user}: ${msg}`;
   } else {
-    console.log(
-      `no algorithm at index ${config.algorithm}, try a number less than ${algorithms.length}`
-    );
+    return `no algorithm at index ${config.algorithm}, try a number less than ${algorithms.length}`;
   }
   return "";
 }
@@ -58,9 +56,8 @@ function onMessageHandler(target, context, msg, self) {
     return;
   }
 
-  // get first 'word' (all chars until whitespace)
-  const commandName = msg.split(" ")[0];
   let result = "";
+  const splitmsg = msg.split(" ");
 
   // helper that executes f if user is a moderator or the broadcaster, otherwise set result
   // to an error message
@@ -72,24 +69,36 @@ function onMessageHandler(target, context, msg, self) {
     result = `@${context.username}, you cannot use this command because you are not a mod`;
   }
 
-  switch (commandName) {
+  switch (splitmsg[0]) {
     case "!t":
+      // handle a tidal pattern
       result = handlePattern(context.username, msg);
       break;
     case "!u":
-      // username as argument (for multiuser debug/testing by mods only)
+      // same as !t but with username as argument (for multiuser debug/testing by mods only)
       // e.g. `!u kuhn msg` to pretend to be the user @kuhn
       modcmd(() => {
-        const tmsg = msg.split(" ");
-        const user = tmsg.splice(1, 1);
-        return handlePattern(user.join(" "), tmsg.join(" "));
+        const user = splitmsg.splice(1, 1);
+        return handlePattern(user.join(" "), splitmsg.join(" "));
+      });
+      break;
+    case "!maxpat":
+      // change the max active patterns
+      modcmd(() => {
+        config.maxActivePatterns = splitmsg[1];
+        return `@${context.username} changed the maximum active patterns to ${config.maxActivePatterns}`;
+      });
+      break;
+    case "!algo":
+      // switch the current algorithm
+      modcmd(() => {
+        config.algorithm = splitmsg[1];
+        return `@${context.username} switched to algorithm[${config.algorithm}]`;
       });
       break;
   }
 
-  if (result) {
-    twitchClient.say(target, result);
-  }
+  twitchClient.say(target, result);
 }
 
 function onConnectedHandler(addr, port) {
