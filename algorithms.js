@@ -19,8 +19,7 @@ module.exports = [
             }
             if (!match) { all.push(latest) }
         } else if (all.length === maxlen) {
-            all.push(current);
-            all.shift();
+            all.push(latest).shift();
         }
         return all;
     },
