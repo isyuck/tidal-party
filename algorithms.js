@@ -5,7 +5,7 @@ module.exports = [
     // algorithm[0] // simple stack //
     // add patterns until maxlen is reached, then replace the
     // oldest pattern with the newest.
-    function(latest, all, maxlen) {
+    (latest, all, maxlen) => {
         if (!all.length) {
             all.push(latest);
         } else if (all.length < maxlen) {
