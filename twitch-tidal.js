@@ -21,7 +21,7 @@ tidal.stderr.on("data", (data) => {
   console.error(`stderr: ${data}`);
 });
 
-function handleNewMessage(user, msg) {
+function handlePattern(user, msg) {
   // parse twitch message into object
   const latest = {
     user: user,
@@ -64,7 +64,7 @@ function onMessageHandler(target, context, msg, self) {
 
   // helper that executes f if user is a moderator or the broadcaster, otherwise set result
   // to an error message
-  function modMessage(f) {
+  function modcmd(f) {
     if (context.mod || context.badges.broadcaster) {
       result = f();
       return;
@@ -74,15 +74,15 @@ function onMessageHandler(target, context, msg, self) {
 
   switch (commandName) {
     case "!t":
-      result = handleNewMessage(context.username, msg);
+      result = handlePattern(context.username, msg);
       break;
     case "!u":
       // username as argument (for multiuser debug/testing by mods only)
       // e.g. `!u kuhn msg` to pretend to be the user @kuhn
-      modMessage(() => {
+      modcmd(() => {
         const tmsg = msg.split(" ");
         const user = tmsg.splice(1, 1);
-        return handleNewMessage(user.join(" "), tmsg.join(" "));
+        return handlePattern(user.join(" "), tmsg.join(" "));
       });
       break;
   }
