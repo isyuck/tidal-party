@@ -1,10 +1,12 @@
 module.exports = {
   twitch: {
     identity: {
-      username: "YOUR_BOT_ACCOUNT",
-      password: "YOUR_TWITCH_OAUTH",
-    },
-    channels: ["YOUR_CHANNEL_NAME"],
+            username: "ctrlav",
+            password: "oauth:5ie3cest9o75u0bxsqpddies987u21",
+        },
+        channels: [
+            "ctrlav"
+        ],
   },
   ghci: {
     path: "BootTidal.hs",

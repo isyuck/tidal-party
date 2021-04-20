@@ -96,6 +96,14 @@ function onMessageHandler(target, context, msg, self) {
         return `@${context.username} switched to algorithm[${config.algorithm}]`;
       });
       break;
+    //help if user wants to check latency
+    case "!latency":
+      return `You can check your Latency to Broadcaster and Latency Mode (along with a number of other stats) by toggling Video Stats under the Advanced menu on the Settings icon on the bottom right hand corner of the video player.`
+    case "!about":
+      return "https://github.com/isyuck/twitch-tidal"
+    //help if user wants to know the available commands
+    case "!commands":
+      return "Available commands are !t, !about, !latency"
   }
 
   twitchClient.say(target, result);
