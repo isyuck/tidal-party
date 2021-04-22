@@ -38,9 +38,16 @@ function handlePattern(user, msg) {
     );
 
     // send patterns to tidal
-    for ([i, p] of patterns.entries()) {
-      tidal.stdin.write(`d${i + 1} \$ ${p.pattern}\n`);
+    if (config.expiration) {
+      for ([i, p] of patterns.entries()) {
+        tidal.stdin.write(`mortal ${i + 1} ${config.expiration} \$ ${p.pattern}\n`);
+      }
+    } else {
+      for ([i, p] of patterns.entries()) {
+        tidal.stdin.write(`jumpIn' ${i + 1} 1 \$ ${p.pattern}\n`);
+      }
     }
+
 
     console.log(patterns);
     return `@${user}: ${msg}`;
@@ -102,6 +109,12 @@ function onMessageHandler(target, context, msg, self) {
     case "!about":
       return "https://github.com/isyuck/twitch-tidal"
     //help if user wants to know the available commands
+    case "!expire":
+      modcmd(() => {
+        config.expiration = splitmsg[1];
+        return `@${context.username} changed the expiration to ${config.expiration}`
+      });
+      break;
     case "!commands":
       return "Available commands are !t, !about, !latency"
   }
