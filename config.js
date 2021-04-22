@@ -13,5 +13,5 @@ module.exports = {
   },
   maxActivePatterns: 8,
   algorithm: 0,
-  expiration: 16
+  expiration: 8
 };
