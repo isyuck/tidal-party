@@ -6,6 +6,8 @@ It provides a interface to TidalCycles from twitch.tv chat, by forwarding patter
 
 Patterns are passed 1:1 between twitch and Tidal, so whatever works in Tidal will (in theory) work from a twitch message.
 
+It's also a great way for a group of people to start learning Tidal without having to install anything (obviously you still have to have things installed).  All you have to do is send folks a twitch.tv link and you're good to go.
+
 Twitch Message | Tidal Equivalent
 --- | ---
 `!t s "bd cp sn hh"` | `d1 $ s "bd cp sn hh"`
@@ -23,6 +25,8 @@ Tidal-Wave doesn't intend to be a twitch based [estuary](https://github.com/dktr
 
 ***Note: this is new software, and you'll probably find a way to break it! If/when you do, please let me know by opening an issue. 💖***
 
+***Note: this allows random people to execute Haskell code onto your computer. Be aware of the security risk that that entails***
+
 ### Requirements
 
 Tidal-Wave should work on all major OS's. You will need, in no particular order:
@@ -35,26 +39,6 @@ Tidal-Wave should work on all major OS's. You will need, in no particular order:
 - [SuperCollider](https://supercollider.github.io/)
 
 A full guide for installing Tidal and SuperCollider for various platforms can be found [here](https://tidalcycles.org/Installation).
-
-After these are installed and working, you will need to modify your Tidal boot file, `BootTidal.hs`, to
-tell Tidal to listen for OSC messages. you can find this in the `tidal` directory wherever cabal is installed , e.g.
-for Tidal v1.7 on Linux: `~/.cabal/share/x86_64-linux-ghc-8.4.4/tidal-1.7/BootTidal.hs`
-
-change the line:
-
-`tidal <- startTidal (superdirtTarget {oLatency = 0.1, oAddress = "127.0.0.1", oPort = 57120}) (defaultConfig {cVerbose = True, cFrameTimespan = 1/20})`
-
-to include:
-
-`cCtrlAddr = "0.0.0.0"` and `cCtrlPort = 6060`
-
-so it looks like this:
-
-`tidal <- startTidal (superdirtTarget {oLatency = 0.1, oAddress = "127.0.0.1", oPort = 57120}) (defaultConfig {cVerbose = True, cFrameTimespan = 1/20, cCtrlAddr = "0.0.0.0", cCtrlPort = 6060})`
-
-`cCtrlPort` is the port that tidal listens for OSC messages on, so if you're using this port for something else,
-or if you want it to be another number you can modify it. (if you do this, keep in mind that you'll have to also change the port from
-6060 in `config.js`.
 
 ---
 
@@ -103,3 +87,5 @@ You can make patterns expire by typing in the chat !expire `x`  where x is the n
 Typing in !expire 0 will revert this functionality to the original `jumpIn'` transition.
 
 To join a group, type !group `groupname`. Your group name may not contain spaces, not can you be in multiple groups at the same time.  But of course, you can edit any of these parameters in script to your liking :)
+
+***Note: this project allows random people to execute Haskell code onto your computer. Be aware of the security risk that that entails.  This is a warning for anyone who especially wants to set this project up for installation.*** 
