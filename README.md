@@ -1,6 +1,6 @@
-# tidal-wave
+# tidal-raid
 
-tidal-wave is an experiment in live coding collaborative music and game design.
+tidal-raid is an experiment in live coding collaborative music and game design.
 
 It provides a interface to TidalCycles from twitch.tv chat, by forwarding patterns to a ghci (command-line Haskell) instance.
 
@@ -19,7 +19,7 @@ Using Tidal 1.7.2, most if not all functions and effects will work, but transiti
 
 Patterns are kept on a time based stack and are associated with users. There is a (configurable, maybe one day dynamic?) maximum number of patterns that can be active at any one time. When a user sends a new pattern to the chat, their currently active (old) pattern will be replaced by their new pattern. If they don't have any active patterns, the *oldest* pattern on the stack will be replaced, regardless of who it belonged to. As new patterns replace old patterns, new groups of patterns will form over time.
 
-Tidal-Wave doesn't intend to be a twitch based [estuary](https://github.com/dktr0/estuary), [troop](https://github.com/Qirky/Troop), or [flok](https://github.com/munshkr/flok). All of these are better alternatives for collaborative live coding. Streaming on twitch incurs a 10-30 second delay between sending a pattern and hearing it's result. With enough active users, by the time you hear your pattern it may already have been replaced by a new one from someone else. Tidal-Wave aims to explore emergent music in a group context, created by users who will have to anticipate where the music will be by the time they get to hear their pattern.  Tidal-Wave also intends to create a game-like experience using tidal as the mechanic.
+tidal-raid doesn't intend to be a twitch based [estuary](https://github.com/dktr0/estuary), [troop](https://github.com/Qirky/Troop), or [flok](https://github.com/munshkr/flok). All of these are better alternatives for collaborative live coding. Streaming on twitch incurs a 10-30 second delay between sending a pattern and hearing it's result. With enough active users, by the time you hear your pattern it may already have been replaced by a new one from someone else. tidal-raid aims to explore emergent music in a group context, created by users who will have to anticipate where the music will be by the time they get to hear their pattern.  tidal-raid also intends to create a game-like experience using tidal as the mechanic.
 
 ---
 
@@ -29,10 +29,10 @@ Tidal-Wave doesn't intend to be a twitch based [estuary](https://github.com/dktr
 
 ### Requirements
 
-Tidal-Wave should work on all major OS's. You will need, in no particular order:
+tidal-raid should work on all major OS's. You will need, in no particular order:
 
 - A twitch channel to stream to
-- A *seperate* account for Tidal-Wave to use as a bot
+- A *seperate* account for tidal-raid to use as a bot
 - People who want to make music
 - [node.js](https://nodejs.org/en/)
 - [TidalCycles](https://tidalcycles.org/Welcome)
@@ -44,15 +44,15 @@ A full guide for installing Tidal and SuperCollider for various platforms can be
 
 ### Install
 
-Once you've met the requirements above, you can download Tidal-Wave by opening a terminal and running:
+Once you've met the requirements above, you can download tidal-raid by opening a terminal and running:
 
-`git clone https://github.com/isyuck/Tidal-Wave.git`
+`git clone https://github.com/isyuck/tidal-raid.git`
 
-Again from a terminal, enter the Tidal-Wave directory by running:
+Again from a terminal, enter the tidal-raid directory by running:
 
-`cd Tidal-Wave`
+`cd tidal-raid`
 
-After this you have to install the packages Tidal-Wave uses. Do this by running:
+After this you have to install the packages tidal-raid uses. Do this by running:
 
 `npm install`
 
@@ -60,20 +60,20 @@ After this you have to install the packages Tidal-Wave uses. Do this by running:
 
 ### Config
 
-Next, you need to configure Tidal-Wave to your channel. Replace `username` and `password` in `config.js` to
+Next, you need to configure tidal-raid to your channel. Replace `username` and `password` in `config.js` to
 the username and password/OAUTH of your bot account. Then change `channels` to the channel name of the *different* account
 hosting the stream. You can also change `maxActivePatterns` if you want to have more/less patterns active at once.
 
 ---
 
 
-### Running Tidal-Wave
+### Running tidal-raid
 
 *Tidal related tutorials can be found on the Tidal wiki.*
 
 Finally, you can start streaming! To get everything started:
 
-- Run Tidal-Wave from a terminal: `node Tidal-Wave.js`.
+- Run tidal-raid from a terminal: `node tidal-raid.js`.
 - Start SuperCollider and SuperDirt.
 - Test it by sending a `!t s "bd cp"` in your twitch chat (you don't have to be live to do this)
 
@@ -88,4 +88,4 @@ Typing in !expire 0 will revert this functionality to the original `jumpIn'` tra
 
 To join a group, type !group `groupname`. Your group name may not contain spaces, not can you be in multiple groups at the same time.  But of course, you can edit any of these parameters in script to your liking :)
 
-***Note: this project allows random people to execute Haskell code onto your computer. Be aware of the security risk that that entails.  This is a warning for anyone who especially wants to set this project up for installation.*** 
+***Note: this project allows random people to execute Haskell code onto your computer. Be aware of the security risk that that entails.  This is a warning for anyone who especially wants to set this project up for installation.***

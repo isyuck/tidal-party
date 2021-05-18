@@ -2,7 +2,7 @@ module.exports = {
   twitch: {
     identity: {
             username: "ctrlav",
-            password: "",
+            password: "oauth:qd7jnx0vsna81703f2ewx6glj5qh0n",
         },
         channels: [
             "ctrlav"

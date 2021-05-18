@@ -16,7 +16,8 @@ twitchClient.on("message", onMessageHandler);
 twitchClient.on("connected", onConnectedHandler);
 twitchClient.connect();
 
-// tidal
+// make sure you have safe-tidal-cli installed
+// , ["-ghci-script", config.ghci.path]
 const tidal = spawn("ghci", ["-ghci-script", config.ghci.path]);
 tidal.stdout.on("data", (data) => {
   console.log(`tidal ${String(data).trim()}`);
@@ -46,6 +47,7 @@ function handlePattern(user, msg) {
       for ([i, p] of patterns.entries()) {
         console.log("mortal")
         tidal.stdin.write(`mortal ${i + 1} ${config.expiration} 1 \$ ${p.pattern}\n`);
+        //tidal.stdin.write(`d1 \$ ${p.pattern}\n`)
       }
     } else {
       for ([i, p] of patterns.entries()) {
