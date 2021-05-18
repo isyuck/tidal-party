@@ -6,13 +6,18 @@ const algorithms = require("./algorithms.js");
 // the list of all active patterns
 let patterns = [];
 
+// the group structure
+let groups = {};
+
+
 // twitch
 const twitchClient = new tmi.client(config.twitch);
 twitchClient.on("message", onMessageHandler);
 twitchClient.on("connected", onConnectedHandler);
 twitchClient.connect();
 
-// tidal
+// make sure you have safe-tidal-cli installed
+// , ["-ghci-script", config.ghci.path]
 const tidal = spawn("ghci", ["-ghci-script", config.ghci.path]);
 tidal.stdout.on("data", (data) => {
   console.log(`tidal ${String(data).trim()}`);
@@ -38,9 +43,21 @@ function handlePattern(user, msg) {
     );
 
     // send patterns to tidal
-    for ([i, p] of patterns.entries()) {
-      tidal.stdin.write(`d${i + 1} \$ ${p.pattern}\n`);
+    if (config.expiration != 0) {
+      for ([i, p] of patterns.entries()) {
+        console.log("mortal")
+        tidal.stdin.write(`mortal ${i + 1} ${config.expiration} 1 \$ ${p.pattern}\n`);
+        //tidal.stdin.write(`d1 \$ ${p.pattern}\n`)
+      }
+    } else {
+      for ([i, p] of patterns.entries()) {
+        console.log("jumpin")
+        // jumpin is a transition and will play the previous pattern before
+        //jumping to the new pattern
+        tidal.stdin.write(`jumpIn' ${i + 1} 1 \$ ${p.pattern}\n`);
+      }
     }
+
 
     console.log(patterns);
     return `@${user}: ${msg}`;
@@ -96,6 +113,38 @@ function onMessageHandler(target, context, msg, self) {
         return `@${context.username} switched to algorithm[${config.algorithm}]`;
       });
       break;
+    //help if user wants to check latency
+    case "!latency":
+      result =  `You can check your Latency to Broadcaster and Latency Mode (along with a number of other stats) by toggling Video Stats under the Advanced menu on the Settings icon on the bottom right hand corner of the video player.`
+      break;
+    case "!about":
+      result =  "https://github.com/isyuck/twitch-tidal";
+      break;
+    //help if user wants to know the available commands
+    case "!expire":
+      modcmd(() => {
+        if(splitmsg[1] >= 0) config.expiration = splitmsg[1];
+        console.log(config.expiration)
+        reset(target);
+        return `@${context.username} changed the expiration to ${config.expiration}`
+      });
+      break;
+    case "!group":
+
+      if(!splitmsg[1]) {
+        result = `@${context.username} please specify a group name.`
+        break;
+      }
+      groups[context.username] = splitmsg[1];
+      result = `@${context.username} joined group ${splitmsg[1]}`;
+      console.log(groups)
+      break;
+    case "!discord":
+      result = "https://discord.gg/2B6MUbBNvN";
+      break;
+    case "!commandlist":
+      result = "Available commands are !t, !about, !latency, !group, !discord";
+      break;
   }
 
   twitchClient.say(target, result);
@@ -103,4 +152,14 @@ function onMessageHandler(target, context, msg, self) {
 
 function onConnectedHandler(addr, port) {
   console.log(`connected on ${addr}:${port}`);
+}
+
+function reset(target) {
+  //both of these mess it up and I don't know why
+  // tidal.stdin.write("hush\n");
+  // for ([i, p] of patterns.entries()) {
+  //   tidal.stdin.write(`d${i+1} $ silence\n`);
+  // }
+  patterns = [];
+  twitchClient.say(target, "hold the phone, twitch-tidal has been reset");
 }
