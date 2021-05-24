@@ -1,44 +1,44 @@
 # tidal-party
 
-tidal-party is an experiment in live coding collaborative music and game design.
+tidal-party is an experiment in collaborative music and game design.
 
-It provides a interface to TidalCycles from twitch.tv chat, by forwarding patterns to a ghci (command-line Haskell) instance.
+tidal-party provides a interface to [TidalCycles](https://tidalcycles.org/Welcome) from twitch.tv chat, allowing large numbers of users to send patterns to a remote Tidal instance. It also exposes moderator-level commands to algorithmically manipulate how patterns get added and removed. _(Work in progress)_
 
-Patterns are passed 1:1 between twitch and Tidal, so whatever works in Tidal will (in theory) work from a twitch message.
+It's a great way for a group of people to start learning Tidal without having to install anything (other than a web browser!). Once the host is up and running, all you have to do is send folks a twitch.tv link and you're good to go.
 
-It's also a great way for a group of people to start learning Tidal without having to install anything (obviously you still have to have things installed).  All you have to do is send folks a twitch.tv link and you're good to go.
+Patterns get passed almost 1:1 between twitch and Tidal, so whatever works in Tidal will (in theory) work from a twitch message.
 
-Twitch Message | Tidal Equivalent
---- | ---
-`!t s "bd cp sn hh"` | `d1 $ s "bd cp sn hh"`
-`!t s "psr*4" # speed "<1 2 3 4>"` | `d1 $ s "psr*4" # speed "<1 2 3 4>"`
+| Twitch Message                     | Tidal Equivalent                     |
+| ---------------------------------- | ------------------------------------ |
+| `!t s "bd cp sn hh"`               | `d1 $ s "bd cp sn hh"`               |
+| `!t s "psr*4" # speed "<1 2 3 4>"` | `d1 $ s "psr*4" # speed "<1 2 3 4>"` |
 
 In practice, you can think of `!t x` as shorthand for Tidal's `d1 $ x`.
 
-Using Tidal 1.7.2, most if not all functions and effects will work, but transitions will not.  If you're using a version of Tidal newer than 1.7.2, newer functions will not work. You can still use some transitions via twitch commands, and this is explained more in-depth in the Game Design section.
+Patterns are kept on a time based stack and are associated with users. There is a (configurable, maybe one day dynamic?) maximum number of patterns that can be active at any one time. When a user sends a new pattern to the chat, their currently active (old) pattern will be replaced by their new pattern. If they don't have any active patterns, the _oldest_ pattern on the stack will be replaced, regardless of who it belonged to. As new patterns replace old patterns, new groups of patterns will form over time.
 
-Patterns are kept on a time based stack and are associated with users. There is a (configurable, maybe one day dynamic?) maximum number of patterns that can be active at any one time. When a user sends a new pattern to the chat, their currently active (old) pattern will be replaced by their new pattern. If they don't have any active patterns, the *oldest* pattern on the stack will be replaced, regardless of who it belonged to. As new patterns replace old patterns, new groups of patterns will form over time.
-
-tidal-party doesn't intend to be a twitch based [estuary](https://github.com/dktr0/estuary), [troop](https://github.com/Qirky/Troop), or [flok](https://github.com/munshkr/flok). All of these are better alternatives for collaborative live coding. Streaming on twitch incurs a 10-30 second delay between sending a pattern and hearing it's result. With enough active users, by the time you hear your pattern it may already have been replaced by a new one from someone else. tidal-party aims to explore emergent music in a group context, created by users who will have to anticipate where the music will be by the time they get to hear their pattern.  tidal-party also intends to create a game-like experience using tidal as the mechanic.
+tidal-party doesn't intend to be a twitch based [estuary](https://github.com/dktr0/estuary), [troop](https://github.com/Qirky/Troop), or [flok](https://github.com/munshkr/flok). All of these are better alternatives for collaborative live coding in smaller groups. Streaming on twitch incurs a 10-30 second delay between sending a pattern and hearing it's result. With enough active users, by the time you hear your pattern it may already have been replaced by a new one from someone else. tidal-party aims to explore emergent music in a group context, while also creating a game-like experience using Tidal as the mechanic.
 
 ---
 
-***Note: this is new software, and you'll probably find a way to break it! If/when you do, please let me know by opening an issue. 💖***
+### Notes
 
-***Note: this allows random people to execute Haskell code onto your computer. Be aware of the security risk that that entails***
+- Some of Tidal's more recent bus effects will not work due to the way orbits are handled internally
+- You can use tidal-party with either GHCi or [safe-tidal-cli](https://github.com/jwaldmann/safe-tidal-cli). It is **_strongly_** recommended to use [safe-tidal-cli](https://github.com/jwaldmann/safe-tidal-cli) to prevent possible remote code exection, users calling `:q` on GHCi, and so on. Please be aware of the risks.
+- This is a new project, and you'll probably find a way to break it! If/when you do, please let us know by opening an issue. 💖
 
 ### Requirements
 
 tidal-party should work on all major OS's. You will need, in no particular order:
 
 - A twitch channel to stream to
-- A *seperate* account for tidal-party to use as a bot
+- A _seperate_ account for tidal-party to use as a bot
 - People who want to make music
 - [node.js](https://nodejs.org/en/)
 - [TidalCycles](https://tidalcycles.org/Welcome)
 - [SuperCollider](https://supercollider.github.io/)
 
-A full guide for installing Tidal and SuperCollider for various platforms can be found [here](https://tidalcycles.org/Installation).
+A full guide for installing Tidal and SuperCollider can be found [here](https://tidalcycles.org/Installation).
 
 ---
 
@@ -60,16 +60,15 @@ After this you have to install the packages tidal-party uses. Do this by running
 
 ### Config
 
-Next, you need to configure tidal-party to your channel. Replace `username` and `password` in `config.js` to
-the username and password/OAUTH of your bot account. Then change `channels` to the channel name of the *different* account
+Next, you need to configure tidal-party to use your channel and bot account. Replace `username` and `password` in `config.js` to
+the username and password/OAUTH of your bot account. Then change `channels` to the channel name of the _different_ account
 hosting the stream. You can also change `maxActivePatterns` if you want to have more/less patterns active at once.
 
 ---
 
-
 ### Running tidal-party
 
-*Tidal related tutorials can be found on the Tidal wiki.*
+_Tidal related tutorials can be found on the [Tidal wiki](https://tidalcycles.org/Userbase)._
 
 Finally, you can start streaming! To get everything started:
 
@@ -77,15 +76,15 @@ Finally, you can start streaming! To get everything started:
 - Start SuperCollider and SuperDirt.
 - Test it by sending a `!t s "bd cp"` in your twitch chat (you don't have to be live to do this)
 
-If everything is working correctly, you should hear a clap and a kick drum.
+If everything is working correctly, you should hear a clap and a kick drum on the host's machine.
 
-### Game Design
+After this you can start streaming the audio from SuperCollider to your twitch channel, for this we recommend [OBS](https://obsproject.com/).
 
-By default, each pattern is added with the transition `jumpIn'`. This adds a pattern always at the beginning of the next cycle.
+### Game Design _(Work in progress)_
 
-You can make patterns expire by typing in the chat !expire `x`  where x is the number of cycles the pattern lasts. This uses the `mortal` transition from Tidal.  You can find a `expiration` parameter in `config.js`
-Typing in !expire 0 will revert this functionality to the original `jumpIn'` transition.
+By default, each pattern gets added with the transition `jumpIn'`. This pattern gets added at the beginning of the next cycle.
 
-To join a group, type !group `groupname`. Your group name may not contain spaces, not can you be in multiple groups at the same time.  But of course, you can edit any of these parameters in script to your liking :)
+You can make patterns expire by typing in the chat `!expire *x*` where x is the number of cycles the pattern lasts. This uses the `mortal` transition from Tidal. You can find a `expiration` parameter in `config.js`.
+Typing in `!expire 0` will revert this functionality to the original `jumpIn'` transition.
 
-***Note: this project allows random people to execute Haskell code onto your computer. Be aware of the security risk that that entails.  This is a warning for anyone who especially wants to set this project up for installation.***
+To join a group, type !group `groupname`. Your group name may not contain spaces, not can you be in multiple groups at the same time. But of course, you can edit any of these parameters in script to your liking :)
