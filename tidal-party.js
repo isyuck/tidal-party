@@ -9,19 +9,20 @@ let patterns = [];
 // the group structure
 let groups = {};
 
-
 // twitch
 const twitchClient = new tmi.client(config.twitch);
 twitchClient.on("message", onMessageHandler);
 twitchClient.on("connected", onConnectedHandler);
 twitchClient.connect();
 
-// make sure you have safe-tidal-cli installed
-// , ["-ghci-script", config.ghci.path]
-const tidal = spawn("ghci", ["-ghci-script", config.ghci.path]);
+const tidal = config.safeTidal
+  ? spawn("safe-tidal-cli")
+  : spawn("ghci", ["-ghci-script", config.ghci.path]);
+
 tidal.stdout.on("data", (data) => {
   console.log(`tidal ${String(data).trim()}`);
 });
+
 tidal.stderr.on("data", (data) => {
   console.error(`stderr: ${data}`);
 });
@@ -45,26 +46,25 @@ function handlePattern(user, msg) {
     // send patterns to tidal
     if (config.expiration != 0) {
       for ([i, p] of patterns.entries()) {
-        console.log("mortal")
-        tidal.stdin.write(`mortal ${i + 1} ${config.expiration} 1 \$ ${p.pattern}\n`);
-        //tidal.stdin.write(`d1 \$ ${p.pattern}\n`)
+        console.log("mortal", i + 1);
+        tidal.stdin.write(
+          `mortal ${i + 1} ${config.expiration} 1 \$ ${p.pattern}\n\n`
+        );
       }
     } else {
       for ([i, p] of patterns.entries()) {
-        console.log("jumpin")
+        console.log("jumpin");
         // jumpin is a transition and will play the previous pattern before
         //jumping to the new pattern
-        tidal.stdin.write(`jumpIn' ${i + 1} 1 \$ ${p.pattern}\n`);
+        tidal.stdin.write(`jumpIn' ${i + 1} 1 \$ ${p.pattern}\n\n`);
       }
     }
-
 
     console.log(patterns);
     return `@${user}: ${msg}`;
   } else {
     return `no algorithm at index ${config.algorithm}, try a number less than ${algorithms.length}`;
   }
-  return "";
 }
 
 function onMessageHandler(target, context, msg, self) {
@@ -115,29 +115,28 @@ function onMessageHandler(target, context, msg, self) {
       break;
     //help if user wants to check latency
     case "!latency":
-      result =  `You can check your Latency to Broadcaster and Latency Mode (along with a number of other stats) by toggling Video Stats under the Advanced menu on the Settings icon on the bottom right hand corner of the video player.`
+      result = `You can check your Latency to Broadcaster and Latency Mode (along with a number of other stats) by toggling Video Stats under the Advanced menu on the Settings icon on the bottom right hand corner of the video player.`;
       break;
     case "!about":
-      result =  "https://github.com/isyuck/twitch-tidal";
+      result = "https://github.com/isyuck/tidal-party";
       break;
     //help if user wants to know the available commands
     case "!expire":
       modcmd(() => {
-        if(splitmsg[1] >= 0) config.expiration = splitmsg[1];
-        console.log(config.expiration)
+        if (splitmsg[1] >= 0) config.expiration = splitmsg[1];
+        console.log(config.expiration);
         reset(target);
-        return `@${context.username} changed the expiration to ${config.expiration}`
+        return `@${context.username} changed the expiration to ${config.expiration}`;
       });
       break;
     case "!group":
-
-      if(!splitmsg[1]) {
-        result = `@${context.username} please specify a group name.`
+      if (!splitmsg[1]) {
+        result = `@${context.username} please specify a group name.`;
         break;
       }
       groups[context.username] = splitmsg[1];
       result = `@${context.username} joined group ${splitmsg[1]}`;
-      console.log(groups)
+      console.log(groups);
       break;
     case "!discord":
       result = "https://discord.gg/2B6MUbBNvN";
