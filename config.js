@@ -13,5 +13,6 @@ module.exports = {
   },
   maxActivePatterns: 8,
   algorithm: 0,
-  expiration: 8
+  expiration: 8,
+  safeTidal: true, // use jwaldmann/safe-tidal-cli (recommended)
 };
