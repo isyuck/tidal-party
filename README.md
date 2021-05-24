@@ -27,6 +27,8 @@ tidal-party doesn't intend to be a twitch based [estuary](https://github.com/dkt
 - You can use tidal-party with either GHCi or [safe-tidal-cli](https://github.com/jwaldmann/safe-tidal-cli). It is **_strongly_** recommended to use [safe-tidal-cli](https://github.com/jwaldmann/safe-tidal-cli) to prevent possible remote code exection, users calling `:q` on GHCi, and so on. Please be aware of the risks.
 - This is a new project, and you'll probably find a way to break it! If/when you do, please let us know by opening an issue. 💖
 
+---
+
 ### Requirements
 
 tidal-party should work on all major OS's. You will need, in no particular order:
