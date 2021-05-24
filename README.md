@@ -82,6 +82,8 @@ If everything is working correctly, you should hear a clap and a kick drum on th
 
 After this you can start streaming the audio from SuperCollider to your twitch channel, for this we recommend [OBS](https://obsproject.com/).
 
+---
+
 ### Game Design _(Work in progress)_
 
 By default, each pattern gets added with the transition `jumpIn'`. This pattern gets added at the beginning of the next cycle.
