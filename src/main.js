@@ -1,45 +1,21 @@
-import tmi from "tmi.js";
-import { spawn } from "child_process";
-
 // local
 import config from "../config/config.js";
 import algorithms from "./algorithms.js";
+import * as twitch from "./twitch.js";
+import * as tidal from "./tidal.js";
 
 export function run() {
 
   // the list of all active patterns
   let patterns = [];
-
   // the group structure
   let groups = {};
 
-  // twitch
-  const twitchClient = new tmi.client(config.twitch);
-  console.log(`connecting to twitch.tv/${config.twitch.channels}`)
-
-  twitchClient.on("connected", (() => {
-    console.log(`connected to twitch.tv successfully`);
-  }));
-
-  twitchClient.on("message", onMessageHandler);
-
-  twitchClient.connect().catch((err) => {
-    console.log(`error: ${err}. Check your configuration!`);
-    process.exit();
-  });
-
-  // tidal
-  const tidal = config.safeTidal
-    ? spawn("safe-tidal-cli")
-    : spawn("ghci", ["-ghci-script", config.ghci.path]);
-
-  tidal.stdout.on("data", (data) => {
-    console.log(`${data}`);
-  });
-
-  tidal.stderr.on("data", (data) => {
-    console.error(`tidal stderr: ${data}`);
-  });
+  // connect to twitch and start tidal
+  twitch.connect();
+  tidal.start();
+  // ref the fn that is called when a message is received
+  twitch.onMessage(onMessageHandler);
 
   function handlePattern(user, msg) {
     // parse twitch message into object
@@ -57,22 +33,15 @@ export function run() {
         config.maxActivePatterns
       );
 
+      // create a string to prepend to each pattern. `X` gets
+      // replaced by the position of the pattern in the list,
+      // e.g. for the fourth pattern X = 4
+      const prepend = (config.expiration != 0)
+        ? `mortal X ${config.expiration} 1`
+        : `jumpIn' X 1`;
+
       // send patterns to tidal
-      if (config.expiration != 0) {
-        for ([i, p] of patterns.entries()) {
-          console.log("mortal", i + 1);
-          tidal.stdin.write(
-            `mortal ${i + 1} ${config.expiration} 1 \$ ${p.pattern}\n\n`
-          );
-        }
-      } else {
-        for ([i, p] of patterns.entries()) {
-          console.log("jumpin");
-          // jumpin is a transition and will play the previous pattern before
-          //jumping to the new pattern
-          tidal.stdin.write(`jumpIn' ${i + 1} 1 \$ ${p.pattern}\n\n`);
-        }
-      }
+      tidal.writePatterns(patterns, prepend);
 
       console.log(patterns);
       return `@${user}: ${msg}`;
@@ -160,17 +129,12 @@ export function run() {
         break;
     }
 
-    twitchClient.say(target, result);
+    twitch.say(target, result);
   }
 
   function reset(target) {
-    //both of these mess it up and I don't know why
-    // tidal.stdin.write("hush\n");
-    // for ([i, p] of patterns.entries()) {
-    //   tidal.stdin.write(`d${i+1} $ silence\n`);
-    // }
+    // TODO hush
     patterns = [];
-    twitchClient.say(target, "hold the phone, twitch-tidal has been reset");
+    twitch.say(target, "hold the phone, twitch-tidal has been reset");
   }
-
 }
