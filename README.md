@@ -27,6 +27,8 @@ tidal-party doesn't intend to be a twitch based [estuary](https://github.com/dkt
 - You can use tidal-party with either GHCi or [safe-tidal-cli](https://github.com/jwaldmann/safe-tidal-cli). It is **_strongly_** recommended to use [safe-tidal-cli](https://github.com/jwaldmann/safe-tidal-cli) to prevent possible remote code exection, users calling `:q` on GHCi, and so on. Please be aware of the risks.
 - This is a new project, and you'll probably find a way to break it! If/when you do, please let us know by opening an issue. 💖
 
+---
+
 ### Requirements
 
 tidal-party should work on all major OS's. You will need, in no particular order:
@@ -79,6 +81,8 @@ Finally, you can start streaming! To get everything started:
 If everything is working correctly, you should hear a clap and a kick drum on the host's machine.
 
 After this you can start streaming the audio from SuperCollider to your twitch channel, for this we recommend [OBS](https://obsproject.com/).
+
+---
 
 ### Game Design _(Work in progress)_
 
