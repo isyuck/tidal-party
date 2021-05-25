@@ -1,7 +1,7 @@
 // an array of functions that take a new pattern & user pair, a
 // list of all current patterns & user pairs, and the max active
 // patterns, and returns a new list of pattern & user pairs
-module.exports = [
+export default [
     // algorithm[0] // simple stack //
     // add patterns until maxlen is reached, then replace the
     // oldest pattern with the newest.
