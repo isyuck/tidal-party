@@ -62,7 +62,7 @@ After this you have to install the packages tidal-party uses. Do this by running
 
 ### Config
 
-Next, you need to configure tidal-party to use your channel and bot account. Replace `username` and `password` in `config.js` to
+Next, you need to configure tidal-party to use your channel and bot account. Replace `username` and `password` in `config/config.js` to
 the username and password/OAUTH of your bot account. Then change `channels` to the channel name of the _different_ account
 hosting the stream. You can also change `maxActivePatterns` if you want to have more/less patterns active at once.
 
@@ -88,7 +88,7 @@ After this you can start streaming the audio from SuperCollider to your twitch c
 
 By default, each pattern gets added with the transition `jumpIn'`. This pattern gets added at the beginning of the next cycle.
 
-You can make patterns expire by typing in the chat `!expire *x*` where x is the number of cycles the pattern lasts. This uses the `mortal` transition from Tidal. You can find a `expiration` parameter in `config.js`.
+You can make patterns expire by typing in the chat `!expire *x*` where x is the number of cycles the pattern lasts. This uses the `mortal` transition from Tidal. You can find a `expiration` parameter in `config/config.js`.
 Typing in `!expire 0` will revert this functionality to the original `jumpIn'` transition.
 
 To join a group, type !group `groupname`. Your group name may not contain spaces, not can you be in multiple groups at the same time. But of course, you can edit any of these parameters in script to your liking :)
