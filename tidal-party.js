@@ -11,20 +11,30 @@ let groups = {};
 
 // twitch
 const twitchClient = new tmi.client(config.twitch);
-twitchClient.on("message", onMessageHandler);
-twitchClient.on("connected", onConnectedHandler);
-twitchClient.connect();
+console.log(`connecting to twitch.tv/${config.twitch.channels}`)
 
+twitchClient.on("connected", (() => {
+  console.log(`connected to twitch.tv successfully`);
+}));
+
+twitchClient.on("message", onMessageHandler);
+
+twitchClient.connect().catch((err) => {
+  console.log(`error: ${err}. Check your configuration!`);
+  process.exit();
+});
+
+// tidal
 const tidal = config.safeTidal
   ? spawn("safe-tidal-cli")
   : spawn("ghci", ["-ghci-script", config.ghci.path]);
 
 tidal.stdout.on("data", (data) => {
-  console.log(`tidal ${String(data).trim()}`);
+  console.log(`${data}`);
 });
 
 tidal.stderr.on("data", (data) => {
-  console.error(`stderr: ${data}`);
+  console.error(`tidal stderr: ${data}`);
 });
 
 function handlePattern(user, msg) {
@@ -147,10 +157,6 @@ function onMessageHandler(target, context, msg, self) {
   }
 
   twitchClient.say(target, result);
-}
-
-function onConnectedHandler(addr, port) {
-  console.log(`connected on ${addr}:${port}`);
 }
 
 function reset(target) {
