@@ -74,7 +74,7 @@ _Tidal related tutorials can be found on the [Tidal wiki](https://tidalcycles.or
 
 Finally, you can start streaming! To get everything started:
 
-- Run tidal-party from a terminal: `node tidal-party.js`.
+- Run tidal-party from a terminal: `npm start`.
 - Start SuperCollider and SuperDirt.
 - Test it by sending a `!t s "bd cp"` in your twitch chat (you don't have to be live to do this)
 
