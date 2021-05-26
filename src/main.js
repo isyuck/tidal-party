@@ -3,6 +3,7 @@ import config from "../config/config.js";
 import algorithms from "./algorithms.js";
 import * as twitch from "./twitch.js";
 import * as tidal from "./tidal.js";
+import * as ui from "./ui.js";
 
 export function run() {
 
@@ -14,6 +15,7 @@ export function run() {
   // connect to twitch and start tidal
   twitch.connect();
   tidal.start();
+  ui.render();
   // ref the fn that is called when a message is received
   twitch.onMessage(onMessageHandler);
 
