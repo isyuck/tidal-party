@@ -44,8 +44,9 @@ export function run() {
 
       // send patterns to tidal
       tidal.writePatterns(patterns, prepend);
+      ui.update(patterns);
 
-      console.log(patterns);
+      // console.log(patterns);
       return `@${user}: ${msg}`;
     } else {
       return `no algorithm at index ${config.algorithm}, try a number less than ${algorithms.length}`;

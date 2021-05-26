@@ -8,14 +8,14 @@ const client = new tmi.client(config.twitch);
 
 // connect the client to twitch
 export function connect() {
-    console.log(`connecting to twitch.tv/${config.twitch.channels} `)
+    // console.log(`connecting to twitch.tv/${config.twitch.channels} `)
 
     client.on("connected", (() => {
-        console.log(`connected to twitch.tv successfully`);
+        // console.log(`connected to twitch.tv successfully`);
     }));
 
     client.connect().catch((err) => {
-        console.log(`error: ${err}. check your configuration!`);
+        // console.log(`error: ${err}. check your configuration!`);
     });
 };
 

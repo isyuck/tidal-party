@@ -11,11 +11,11 @@ const tidal = config.safeTidal
 export function start() {
 
     tidal.stdout.on("data", (data) => {
-        console.log(`${data}`);
+        // console.log(`${data}`);
     });
 
     tidal.stderr.on("data", (data) => {
-        console.error(`error: ${data}`);
+        // console.error(`error: ${data}`);
     });
 }
 
