@@ -3,7 +3,8 @@ import config from "../config/config.js";
 import algorithms from "./algorithms.js";
 import * as twitch from "./twitch.js";
 import * as tidal from "./tidal.js";
-import * as ui from "./ui.js";
+import * as ui from "./ui/ui.js";
+
 
 export function run() {
 
@@ -12,12 +13,30 @@ export function run() {
   // the group structure
   let groups = {};
 
-  // connect to twitch and start tidal
+  // initialise info UI // TODO update when options are changed while running
+  ui.info.set("channel", `${config.twitch.channels}`.replace("#", ""), "blue");
+  ui.info.set("bot account", config.twitch.identity.username, "blue");
+  ui.info.set("max patterns", config.maxActivePatterns, "white");
+  ui.info.set("expiration", config.expiration, "white");
+  ui.info.set("algorithm", config.algorithm, "white");
+  // update the uptime in the ui
+  setInterval(() => {
+    ui.info.set("uptime",
+      `${new Date(process.uptime() * 1000).toISOString().substr(11, 8)}`,
+      "white")
+  }, 1000);
+
+  // connect to twitch, start tidal, render ui
   twitch.connect();
   tidal.start();
   ui.render();
+  // update ui every second
+  setInterval(() => ui.render(), 1000);
+
   // ref the fn that is called when a message is received
   twitch.onMessage(onMessageHandler);
+
+  twitch.onConnect(() => ui.info.set("connected", "true", "green"));
 
   function handlePattern(user, msg) {
     // parse twitch message into object

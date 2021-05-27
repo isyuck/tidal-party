@@ -7,7 +7,7 @@ export default {
     channels: ["YOUR_CHANNEL"],
   },
   ghci: {
-    path: "BootTidal.hs",
+    path: "config/BootTidal.hs",
   },
   maxActivePatterns: 8,
   algorithm: 0,
