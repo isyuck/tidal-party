@@ -1,7 +1,7 @@
 import blessed from "blessed"
-
 // local
 import * as info from "./info.js"
+
 export { info }
 
 var screen = blessed.screen({
@@ -110,7 +110,7 @@ var titleBox = blessed.box({
 //     render();
 // }
 
-// initalise
+// initalise info
 info.set("", "", "");
 
 export function render() {
