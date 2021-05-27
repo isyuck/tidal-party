@@ -5,7 +5,6 @@ import * as twitch from "./twitch.js";
 import * as tidal from "./tidal.js";
 import * as ui from "./ui/ui.js";
 
-
 export function run() {
 
   // the list of all active patterns
@@ -13,12 +12,14 @@ export function run() {
   // the group structure
   let groups = {};
 
-  // initialise info UI // TODO update when options are changed while running
+  // create & initialise info UI // TODO update when options are changed while running
+  ui.info.set("connected", "false", "red");
   ui.info.set("channel", `${config.twitch.channels}`.replace("#", ""), "blue");
   ui.info.set("bot account", config.twitch.identity.username, "blue");
-  ui.info.set("max patterns", config.maxActivePatterns, "white");
-  ui.info.set("expiration", config.expiration, "white");
-  ui.info.set("algorithm", config.algorithm, "white");
+  ui.info.set("max patterns", config.maxActivePatterns, "blue");
+  ui.info.set("expiration", `${config.expiration} cycles`, "blue");
+  ui.info.set("algorithm", `${config.algorithm}`, "blue");
+  ui.info.set("uptime", "00:00:00", "white");
   // update the uptime in the ui
   setInterval(() => {
     ui.info.set("uptime",

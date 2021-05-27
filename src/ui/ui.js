@@ -110,9 +110,6 @@ var titleBox = blessed.box({
 //     render();
 // }
 
-// initalise info
-info.set("", "", "");
-
 export function render() {
     screen.append(mainContainer);
     screen.append(titleBox);

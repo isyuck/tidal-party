@@ -14,16 +14,7 @@ class InfoLine {
     }
 };
 
-// whatever info we want to show. the color applies to the state
-let infoLines = [
-    new InfoLine("connected", "false", "red"),
-    new InfoLine("uptime", "00:00:00", "white"),
-    new InfoLine("channel", "", "white"),
-    new InfoLine("bot account", "", "white"),
-    new InfoLine("max patterns", "", "white"),
-    new InfoLine("expiration", "", "white"),
-    new InfoLine("algorithm", "", "white"),
-];
+let infoLines = [];
 
 // what contains the info lines
 var container = {
@@ -43,17 +34,27 @@ var container = {
 };
 
 // update the state and color of an info line using it's title.
-// this also updates the whole container
+// this also updates the whole container. if a title matching
+// the one passed isn't found, it gets added.
 export function set(title, state, color) {
     let s = "";
-    for (let info of infoLines) {
-        // update info line
-        if (title == info.title) {
-            info.state = state;
-            info.color = color;
+    // add by default
+    let newelem = true;
+    if (infoLines.length) {
+        for (let info of infoLines) {
+            // update info line, don't add
+            if (title == info.title) {
+                info.state = state;
+                info.color = color;
+                newelem = false;
+            }
+            // append each line onto s
+            s += info.get()
         }
-        // append each line into s
-        s += info.get()
+    }
+    if (newelem) {
+        infoLines.push(new InfoLine(title, state, color));
+        s += infoLines[infoLines.length - 1].get()
     }
     container.content = " {inverse}info{/inverse}" + s;
 }
