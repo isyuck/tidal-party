@@ -20,6 +20,8 @@ export function run() {
   ui.info.set("expiration", `${config.expiration} cycles`, "blue");
   ui.info.set("algorithm", `${config.algorithm}`, "blue");
   ui.info.set("uptime", "00:00:00", "white");
+  ui.info.set("fav sample", "todo", "white");
+  ui.info.set("msg count", "todo", "white");
   // update the uptime in the ui
   setInterval(() => {
     ui.info.set("uptime",
