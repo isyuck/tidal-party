@@ -37,6 +37,9 @@ var container = {
 // this also updates the whole container. if a title matching
 // the one passed isn't found, it gets added.
 export function set(title, state, color) {
+    // ignore blanks
+    if (title == "" || state == "" || color == "") { return }
+    // string to append lines into
     let s = "";
     // add by default
     let newelem = true;
