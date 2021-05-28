@@ -1,4 +1,3 @@
-var blessed = require("blessed")
 // contains a 'line' of info, e.g. connection and status,
 // and some formatting
 class InfoLine {
@@ -18,7 +17,7 @@ class InfoLine {
 let infoLines = [];
 
 // what contains the info lines
-var container = blessed.box({
+var container = {
     tags: true,
     height: "33%+2",
     width: "100%-3",
@@ -32,7 +31,7 @@ var container = blessed.box({
         fg: "white",
         type: "line",
     },
-});
+};
 
 // update the state and color of an info line using it's title.
 // this also updates the whole container. if a title matching

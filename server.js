@@ -1,3 +1,3 @@
-const main = require("./src/main.js")
+var main = require("./src/main.js")
 
 main.run();

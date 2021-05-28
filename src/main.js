@@ -1,11 +1,12 @@
+var blessed = require("blessed")
 // local
 const { config } = require("../config/config.js");
 const { algorithms } = require("./algorithms.js");
 const twitch = require("./twitch.js");
 const tidal = require("./tidal.js");
-const ui = require("./ui/ui.js");
+var ui = require("./ui/ui.js");
 
-exports.run = () => {
+const run = () => {
 
   // the list of all active patterns
   let patterns = [];
@@ -163,3 +164,5 @@ exports.run = () => {
     twitch.say(target, "hold the phone, twitch-tidal has been reset");
   }
 }
+
+exports.run = run

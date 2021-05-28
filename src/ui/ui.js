@@ -111,7 +111,7 @@ var titleBox = blessed.box({
 const render = () => {
     screen.append(mainContainer);
     screen.append(titleBox);
-    screen.append(info.get())
+    leftContainer.append(blessed.box(info.get()));
     patternContainer.focus();
     screen.render();
 }
