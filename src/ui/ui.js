@@ -1,6 +1,6 @@
 var blessed = require("blessed")
 // local
-const info = require("./info.js")
+const Info = require("./info.js")
 
 var screen = blessed.screen({
     title: 'tidal-party',
@@ -21,7 +21,7 @@ var leftContainer = blessed.box({
     width: "60%",
     style: {
         fg: '#ff00ff',
-        bg: 'green',
+        bg: 'black',
     },
 });
 
@@ -108,11 +108,13 @@ var titleBox = blessed.box({
 //     render();
 // }
 
+let info = new Info
+
 const render = () => {
     screen.append(mainContainer);
     screen.append(titleBox);
-    leftContainer.append(blessed.box(info.get()));
-    patternContainer.focus();
+    screen.append(info.node);
+
     screen.render();
 }
 

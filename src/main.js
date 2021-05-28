@@ -1,4 +1,3 @@
-var blessed = require("blessed")
 // local
 const { config } = require("../config/config.js");
 const { algorithms } = require("./algorithms.js");
