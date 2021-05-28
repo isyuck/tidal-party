@@ -1,26 +1,31 @@
-import tmi from "tmi.js";
+const tmi = require("tmi.js")
 
 // local
-import config from "../config/config.js";
+const config = require("../config/config.js");
 
 // setup a twitch client using the config file
 const client = new tmi.client(config.twitch);
 
 // connect the client to twitch
-export function connect() {
+const connect = () => {
     client.connect().catch((err) => {
         // console.log(`error: ${err}. check your configuration!`);
     });
 };
 
-export function onConnect(fn) {
+const onConnect = (fn) => {
     client.on("connected", fn);
 };
 
-export function onMessage(fn) {
+const onMessage = (fn) => {
     client.on("message", fn);
 };
 
-export function say(target, msg) {
+const say = (target, msg) => {
     client.say(target, msg);
 }
+
+exports.connect = connect;
+exports.onConnect = onConnect;
+exports.onMessage = onMessage;
+exports.say = say;

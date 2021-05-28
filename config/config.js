@@ -1,4 +1,4 @@
-export default {
+exports.config = {
   twitch: {
     identity: {
       username: "YOUR_BOT_USERNAME",

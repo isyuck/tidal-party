@@ -1,8 +1,6 @@
-import blessed from "blessed"
+var blessed = require("blessed")
 // local
-import * as info from "./info.js"
-
-export { info }
+const info = require("./info.js")
 
 var screen = blessed.screen({
     title: 'tidal-party',
@@ -110,10 +108,13 @@ var titleBox = blessed.box({
 //     render();
 // }
 
-export function render() {
+const render = () => {
     screen.append(mainContainer);
     screen.append(titleBox);
-    leftContainer.append(blessed.box(info.get()))
+    screen.append(info.get())
     patternContainer.focus();
     screen.render();
 }
+
+exports.info = info;
+exports.render = render;

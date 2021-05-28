@@ -1,11 +1,11 @@
 // local
-import config from "../config/config.js";
-import algorithms from "./algorithms.js";
-import * as twitch from "./twitch.js";
-import * as tidal from "./tidal.js";
-import * as ui from "./ui/ui.js";
+const { config } = require("../config/config.js");
+const { algorithms } = require("./algorithms.js");
+const twitch = require("./twitch.js");
+const tidal = require("./tidal.js");
+const ui = require("./ui/ui.js");
 
-export function run() {
+exports.run = () => {
 
   // the list of all active patterns
   let patterns = [];

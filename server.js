@@ -1,3 +1,3 @@
-import { run } from "./src/main.js";
+const main = require("./src/main.js")
 
-run();
+main.run();

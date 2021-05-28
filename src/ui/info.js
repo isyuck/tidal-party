@@ -1,3 +1,4 @@
+var blessed = require("blessed")
 // contains a 'line' of info, e.g. connection and status,
 // and some formatting
 class InfoLine {
@@ -17,7 +18,7 @@ class InfoLine {
 let infoLines = [];
 
 // what contains the info lines
-var container = {
+var container = blessed.box({
     tags: true,
     height: "33%+2",
     width: "100%-3",
@@ -31,12 +32,12 @@ var container = {
         fg: "white",
         type: "line",
     },
-};
+});
 
 // update the state and color of an info line using it's title.
 // this also updates the whole container. if a title matching
 // the one passed isn't found, it gets added.
-export function set(title, state, color) {
+const set = (title, state, color) => {
     // ignore blanks
     if (title == "" || state == "" || color == "") { return }
     // string to append lines into
@@ -62,6 +63,9 @@ export function set(title, state, color) {
     container.content = " {inverse}info{/inverse}" + s;
 }
 
-export function get() {
+const get = () => {
     return container;
 }
+
+exports.set = set;
+exports.get = get;
