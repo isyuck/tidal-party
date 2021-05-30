@@ -4,6 +4,15 @@ exports.config = {
       username: "YOUR_BOT_USERNAME",
       password: "YOUR_BOT_OATH",
     },
+    channels: ["isyuck"],
+    options: {
+      debug: false,
+      messagesLogLevel: "info"
+    },
+    connection: {
+      reconnect: true,
+      secure: true,
+    },
     channels: ["YOUR_CHANNEL"],
   },
   ghci: {
