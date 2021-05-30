@@ -2,6 +2,9 @@ var blessed = require("blessed")
 // local
 const Info = require("./info.js")
 const Patterns = require("./patterns.js")
+const Game = require("./game.js")
+
+// config
 const about = require("../../config/about.js")
 
 var screen = blessed.screen({
@@ -12,6 +15,7 @@ var screen = blessed.screen({
 
 let info = new Info
 let patterns = new Patterns
+let game = new Game
 let borderStyle = { fg: "white", type: "line" };
 
 var mainContainer = blessed.box({
@@ -55,6 +59,7 @@ const render = () => {
     screen.append(titleBox);
     screen.append(info.node);
     screen.append(patterns.node);
+    screen.append(game.node);
 
     screen.render();
 }
@@ -64,6 +69,7 @@ const render = () => {
 render();
 patterns.init();
 info.init();
+game.init();
 
 exports.info = info;
 exports.patterns = patterns;

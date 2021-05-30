@@ -24,7 +24,7 @@ class Info {
             tags: true,
             height: "33%+3",
             padding: { left: 1 },
-            width: "60%-3",
+            width: "20%-3",
             top: "66%-1",
             left: 0,
             style: {
