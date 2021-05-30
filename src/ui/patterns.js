@@ -4,11 +4,10 @@ var ui = require("./ui.js")
 class Patterns {
   constructor() {
     this.node = blessed.box({
-      content: " {underline}{bold}patterns{/bold}{/underline}",
       tags: true,
       height: "60%+1",
       width: "60%-3",
-      top: "0%+1",
+      top: 1,
       left: 0,
       style: {
         fg: 'white',
@@ -17,15 +16,18 @@ class Patterns {
       border: { fg: "#ff00ff", type: "line" },
     })
   }
+  init() {
+    this.node.setContent("");
+    this.node.setLine(0, " {underline}{bold}patterns{/bold}{/underline}");
+  }
 
   update(patterns) {
-    let s = "";
-    for (let [i, p] of patterns.entries()) {
-      let u = `{bold}${p.user.padEnd(15, ' ')}{/bold}`
-      s += `\n ${u}${p.pattern}`
+    this.init();
+    for (let p of patterns) {
+      let u = `{inverse} ${p.user} {/inverse}`
+      let s = ` ${u} \`${p.pattern}\``
+      this.node.insertBottom(s)
     }
-    this.node.content = " {underline}{bold}patterns{/bold}{/underline}" + s;
-
   }
 }
 

@@ -11,7 +11,7 @@ class InfoLine {
     // return the formatted info
     get() {
         // it looks ugly..
-        return "\n " + `${this.title}`.padEnd(14, ' ')
+        return ` ${this.title}`.padEnd(14, ' ')
             + `{bold}{${this.color}-fg}${this.state}{/${this.color}-fg}{/bold}`;
     }
 };
@@ -34,14 +34,18 @@ class Info {
         })
     }
 
+    init() {
+        this.node.setContent("");
+        this.node.setLine(0, " {underline}{bold}info{/bold}{/underline}");
+    }
+
     // update the state and color of an info line using it's title.
     // this also updates the whole container. if a title matching
     // the one passed isn't found, it gets added.
     set(title, state, color) {
+        this.init();
         // ignore blanks
         if (title == "" || state == "" || color == "") { return }
-        // string to append lines into
-        let s = "";
         // add by default
         let newelem = true;
         if (infoLines.length) {
@@ -52,15 +56,13 @@ class Info {
                     info.color = color;
                     newelem = false;
                 }
-                // append each line onto s
-                s += info.get()
+                this.node.insertBottom(info.get())
             }
         }
         if (newelem) {
             infoLines.push(new InfoLine(title, state, color));
-            s += infoLines[infoLines.length - 1].get()
+            this.node.insertBottom(infoLines[infoLines.length - 1].get())
         }
-        this.node.content = " {underline}{bold}info{/bold}{/underline}" + s;
     }
 }
 

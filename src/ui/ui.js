@@ -25,6 +25,7 @@ var aboutContainer = blessed.box({
     tags: true,
     height: "100%-1",
     width: "40%+4",
+    top: 1,
     left: "60%-4",
     style: {
         fg: 'white',
@@ -47,14 +48,22 @@ var titleBox = blessed.box({
 });
 
 const render = () => {
-    mainContainer.append(aboutContainer);
-    screen.append(mainContainer);
+
+    screen.append(aboutContainer);
     screen.append(titleBox);
     screen.append(info.node);
     screen.append(patterns.node);
 
     screen.render();
 }
+
+// initialisation has to happen after appendation,
+// so do this once here
+render();
+patterns.init();
+info.init();
+
+
 
 exports.info = info;
 exports.patterns = patterns;
