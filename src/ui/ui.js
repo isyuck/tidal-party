@@ -11,6 +11,7 @@ var screen = blessed.screen({
 
 let info = new Info
 let patterns = new Patterns
+let borderStyle = { fg: "white", type: "line" };
 
 var mainContainer = blessed.box({
     height: "100%",
@@ -19,19 +20,8 @@ var mainContainer = blessed.box({
     left: 0,
 });
 
-var leftContainer = blessed.box({
-    parent: mainContainer,
-    height: "100%",
-    width: "60%",
-    style: {
-        fg: '#ff00ff',
-        bg: 'black',
-    },
-});
-
-var rightContainer = blessed.box({
-    parent: mainContainer,
-    content: " {underline}about & instructions{/underline}",
+var aboutContainer = blessed.box({
+    content: " {underline}{bold}about & instructions{/bold}{/underline}",
     tags: true,
     height: "100%-1",
     width: "40%+4",
@@ -40,24 +30,12 @@ var rightContainer = blessed.box({
         fg: 'white',
         bg: 'black',
     },
-    border: {
-        fg: "white",
-        type: "line",
-    },
-});
-
-var patternContainer = blessed.box({
-    parent: leftContainer,
-    height: "66%",
-    width: "100%",
-    style: {
-        fg: 'black',
-        bg: 'black',
-    },
+    border: { fg: "#ff00ff", type: "line" },
 });
 
 var titleBox = blessed.box({
-    content: " tidal-party",
+    content: ` {bold}tidal-party{/bold}  v${process.env.npm_package_version}`,
+    tags: true,
     height: "shrink",
     width: "100%",
     top: 0,
@@ -68,8 +46,8 @@ var titleBox = blessed.box({
     }
 });
 
-
 const render = () => {
+    mainContainer.append(aboutContainer);
     screen.append(mainContainer);
     screen.append(titleBox);
     screen.append(info.node);

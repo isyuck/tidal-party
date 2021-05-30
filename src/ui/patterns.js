@@ -1,9 +1,10 @@
 var blessed = require("blessed")
+var ui = require("./ui.js")
 
 class Patterns {
   constructor() {
     this.node = blessed.box({
-      content: " {underline}patterns{/underline}",
+      content: " {underline}{bold}patterns{/bold}{/underline}",
       tags: true,
       height: "60%+1",
       width: "60%-3",
@@ -13,10 +14,7 @@ class Patterns {
         fg: 'white',
         bg: 'black',
       },
-      border: {
-        fg: "white",
-        type: "line",
-      }
+      border: { fg: "#ff00ff", type: "line" },
     })
   }
 
@@ -26,7 +24,7 @@ class Patterns {
       let u = `{bold}${p.user.padEnd(15, ' ')}{/bold}`
       s += `\n ${u}${p.pattern}`
     }
-    this.node.content = " {underline}patterns{/underline}" + s;
+    this.node.content = " {underline}{bold}patterns{/bold}{/underline}" + s;
 
   }
 }

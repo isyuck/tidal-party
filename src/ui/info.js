@@ -1,4 +1,5 @@
 var blessed = require("blessed")
+
 // contains a 'line' of info, e.g. connection and status,
 // and some formatting
 class InfoLine {
@@ -29,10 +30,7 @@ class Info {
                 fg: 'white',
                 bg: 'black',
             },
-            border: {
-                fg: "white",
-                type: "line",
-            }
+            border: { fg: "#ff00ff", type: "line" },
         })
     }
 
@@ -62,7 +60,7 @@ class Info {
             infoLines.push(new InfoLine(title, state, color));
             s += infoLines[infoLines.length - 1].get()
         }
-        this.node.content = " {underline}info{/underline}" + s;
+        this.node.content = " {underline}{bold}info{/bold}{/underline}" + s;
     }
 }
 
