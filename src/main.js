@@ -136,7 +136,6 @@ function onMessageHandler(target, context, msg, self) {
     case "!about":
       result = "https://github.com/isyuck/tidal-party";
       break;
-    //help if user wants to know the available commands
     case "!expire":
       modcmd(() => {
         if (splitmsg[1] >= 0) config.expiration = splitmsg[1];
@@ -157,7 +156,7 @@ function onMessageHandler(target, context, msg, self) {
     case "!discord":
       result = "https://discord.gg/2B6MUbBNvN";
       break;
-    case "!commandlist":
+    case "!cmds":
       result = "Available commands are !t, !about, !latency, !group, !discord";
       break;
   }
