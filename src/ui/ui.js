@@ -8,6 +8,8 @@ var screen = blessed.screen({
     dockBorders: true,
 });
 
+let info = new Info
+
 var mainContainer = blessed.box({
     height: "100%",
     width: "100%",
@@ -107,8 +109,6 @@ var titleBox = blessed.box({
 //     patternContainer.append(tempBox)
 //     render();
 // }
-
-let info = new Info
 
 const render = () => {
     screen.append(mainContainer);
