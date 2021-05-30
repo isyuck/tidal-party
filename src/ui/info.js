@@ -10,8 +10,8 @@ class InfoLine {
     // return the formatted info
     get() {
         // it looks ugly..
-        return "\n " + `{bold}${this.title}{/bold}:`.padEnd(27, ' ')
-            + `{${this.color}-fg}${this.state}{/${this.color}-fg}`;
+        return "\n " + `${this.title}`.padEnd(14, ' ')
+            + `{bold}{${this.color}-fg}${this.state}{/${this.color}-fg}{/bold}`;
     }
 };
 
@@ -21,8 +21,8 @@ class Info {
     constructor() {
         this.node = blessed.box({
             tags: true,
-            height: "33%+2",
-            width: "100%-3",
+            height: "33%+3",
+            width: "60%-3",
             top: "66%-1",
             left: 0,
             style: {
@@ -62,7 +62,7 @@ class Info {
             infoLines.push(new InfoLine(title, state, color));
             s += infoLines[infoLines.length - 1].get()
         }
-        this.node.content = " {inverse}info{/inverse}" + s;
+        this.node.content = " {underline}info{/underline}" + s;
     }
 }
 

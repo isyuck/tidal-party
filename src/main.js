@@ -26,7 +26,6 @@ const run = () => {
   twitch.on("connected", () => ui.info.set("connected", "true", "green"))
   twitch.on("message", onMessageHandler)
 
-
   // create & initialise info UI // TODO update when options are changed while running
   ui.info.set("connected", "false", "red");
   ui.info.set("channel", `${config.twitch.channels}`.replace("#", ""), "blue");
@@ -71,7 +70,7 @@ function handlePattern(user, msg) {
 
     // send patterns to tidal
     tidal.writePatterns(patterns, prepend);
-    // ui.update(patterns);
+    ui.patterns.update(patterns);
 
     // console.log(patterns);
     return `@${user}: ${msg}`;

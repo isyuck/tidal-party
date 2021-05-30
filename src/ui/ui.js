@@ -1,6 +1,7 @@
 var blessed = require("blessed")
 // local
 const Info = require("./info.js")
+const Patterns = require("./patterns.js")
 
 var screen = blessed.screen({
     title: 'tidal-party',
@@ -9,6 +10,7 @@ var screen = blessed.screen({
 });
 
 let info = new Info
+let patterns = new Patterns
 
 var mainContainer = blessed.box({
     height: "100%",
@@ -29,7 +31,8 @@ var leftContainer = blessed.box({
 
 var rightContainer = blessed.box({
     parent: mainContainer,
-    content: " about & instructions",
+    content: " {underline}about & instructions{/underline}",
+    tags: true,
     height: "100%-1",
     width: "40%+4",
     left: "60%-4",
@@ -53,38 +56,6 @@ var patternContainer = blessed.box({
     },
 });
 
-var userColumn = blessed.box({
-    parent: patternContainer,
-    content: " user column",
-    height: "100%",
-    width: "33%+1",
-    style: {
-        fg: 'white',
-        bg: 'black',
-    },
-    border: {
-        fg: "white",
-        type: "line",
-    },
-});
-
-var patternColumn = blessed.box({
-    parent: patternContainer,
-    content: " pattern column",
-    height: "100%",
-    width: "66%",
-    left: "33%",
-    style: {
-        fg: 'white',
-        bg: 'black',
-    },
-    border: {
-        fg: "white",
-        type: "line",
-    },
-});
-
-
 var titleBox = blessed.box({
     content: " tidal-party",
     height: "shrink",
@@ -97,26 +68,16 @@ var titleBox = blessed.box({
     }
 });
 
-// export function update(patterns) {
-//     let tempBox = blessed.box({
-//         content: "",
-//         height: "100%",
-//         width: "100%",
-//     });
-//     for (let [i, p] of patterns.entries()) {
-//         tempBox.setLine(i + 1, `${p.pattern}`)
-//     }
-//     patternContainer.append(tempBox)
-//     render();
-// }
 
 const render = () => {
     screen.append(mainContainer);
     screen.append(titleBox);
     screen.append(info.node);
+    screen.append(patterns.node);
 
     screen.render();
 }
 
 exports.info = info;
+exports.patterns = patterns;
 exports.render = render;
