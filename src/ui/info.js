@@ -11,7 +11,7 @@ class InfoLine {
     // return the formatted info
     get() {
         // it looks ugly..
-        return ` ${this.title}`.padEnd(14, ' ')
+        return `${this.title}`.padEnd(14, ' ')
             + `{bold}{${this.color}-fg}${this.state}{/${this.color}-fg}{/bold}`;
     }
 };
@@ -23,6 +23,7 @@ class Info {
         this.node = blessed.box({
             tags: true,
             height: "33%+3",
+            padding: { left: 1 },
             width: "60%-3",
             top: "66%-1",
             left: 0,
@@ -36,7 +37,7 @@ class Info {
 
     init() {
         this.node.setContent("");
-        this.node.setLine(0, " {underline}{bold}info{/bold}{/underline}");
+        this.node.setLine(0, "{underline}{bold}info{/bold}{/underline}");
     }
 
     // update the state and color of an info line using it's title.

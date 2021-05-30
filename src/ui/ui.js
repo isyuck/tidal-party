@@ -2,6 +2,7 @@ var blessed = require("blessed")
 // local
 const Info = require("./info.js")
 const Patterns = require("./patterns.js")
+const about = require("../../config/about.js")
 
 var screen = blessed.screen({
     title: 'tidal-party',
@@ -21,7 +22,8 @@ var mainContainer = blessed.box({
 });
 
 var aboutContainer = blessed.box({
-    content: " {underline}{bold}about & instructions{/bold}{/underline}",
+    content: `{underline}{bold}about & instructions{/bold}{/underline} \n${about}`,
+    padding: { left: 1, right: 1 },
     tags: true,
     height: "100%-1",
     width: "40%+4",
@@ -62,8 +64,6 @@ const render = () => {
 render();
 patterns.init();
 info.init();
-
-
 
 exports.info = info;
 exports.patterns = patterns;
