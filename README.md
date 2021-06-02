@@ -91,4 +91,4 @@ By default, each pattern gets added with the transition `jumpIn'`. This pattern 
 You can make patterns expire by typing in the chat `!expire *x*` where x is the number of cycles the pattern lasts. This uses the `mortal` transition from Tidal. You can find a `expiration` parameter in `config/config.js`.
 Typing in `!expire 0` will revert this functionality to the original `jumpIn'` transition.
 
-To join a group, type !group `groupname`. Your group name may not contain spaces, not can you be in multiple groups at the same time. But of course, you can edit any of these parameters in script to your liking :)
+To join a group, type !group `groupname`. Your group name may not contain spaces, nor can you be in multiple groups at the same time. But of course, you can edit any of these parameters in script to your liking :)
