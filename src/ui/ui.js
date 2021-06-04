@@ -72,5 +72,6 @@ info.init();
 game.init();
 
 exports.info = info;
+exports.game = game;
 exports.patterns = patterns;
 exports.render = render;

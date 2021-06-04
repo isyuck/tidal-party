@@ -1,10 +1,9 @@
 exports.config = {
   twitch: {
     identity: {
-      username: "YOUR_BOT_USERNAME",
-      password: "YOUR_BOT_OATH",
+      username: "ctrlav",
+      password: "oauth:1i7ylkznxdpr5jc4gijpp4s9r37ais",
     },
-    channels: ["isyuck"],
     options: {
       debug: false,
       messagesLogLevel: "info"
@@ -13,7 +12,7 @@ exports.config = {
       reconnect: true,
       secure: true,
     },
-    channels: ["YOUR_CHANNEL"],
+    channels: ["ctrlav"],
   },
   ghci: {
     path: "config/BootTidal.hs",
@@ -22,4 +21,6 @@ exports.config = {
   algorithm: 0,
   expiration: 8,
   safeTidal: true,
+  currentGame: "Sandbox",
+  difficulty: "easy"
 }

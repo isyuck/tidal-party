@@ -3,7 +3,12 @@ I. games purely in TidalCycles
   b. jazz combo
     i. main section and solo section
   c. algorithmic etudes
+    d. equivalent patterns
+    e. function / type prompt
+    f. drumming exercises
+    g. given a phrase, generate a melody
   d. score-a-poem
+  e. tidalcycles course helper
 
 
 II. games where some users are not using Tidal

@@ -1,6 +1,7 @@
 // local
 const { config } = require("../config/config.js");
 const { algorithms } = require("./algorithms.js");
+const { gamesObj } = require("./gamesObj.js");
 const tmi = require("tmi.js");
 const tidal = require("./tidal.js");
 const ui = require("./ui/ui.js");
@@ -11,6 +12,8 @@ let patterns = [];
 let groups = {};
 // the msg counter
 let totalmsgs = 0;
+// load default game data
+let gameData = gamesObj[config.currentGame];
 
 const twitch = new tmi.Client(config.twitch);
 
@@ -43,6 +46,10 @@ const run = () => {
       `${new Date(process.uptime() * 1000).toISOString().substr(11, 8)}`,
       "white")
   }, 1000);
+
+  //set game stuff
+  ui.game.set("name", config.currentGame, "blue");
+  ui.game.set("rules", gameData.rules, "blue");
 }
 
 function handlePattern(user, msg) {
@@ -156,6 +163,37 @@ function onMessageHandler(target, context, msg, self) {
     case "!discord":
       result = "https://discord.gg/2B6MUbBNvN";
       break;
+    case "!game":
+      //this is a mod command so randos can't change the game at will
+      modcmd(() => {
+        //check if games is in games list
+        if (gamesObj[splitmsg[1]]) {
+          reset(target);
+          //change configuration
+          config.currentGame = splitmsg[1];
+          loadGame(splitmsg[1]);
+          return `@${context.username} changed the game to ${config.currentGame}`
+        } else {
+          if (splitmsg[1] == undefined) {
+            //if game not supplied, restart
+            loadGame(config.currentGame, config.difficulty)
+            return `Game Restarted!`
+          }  else {
+            //if game isn't in the list
+            return `${splitmsg[1]} does not exist :(`
+          }
+        }
+      });
+      break;
+    case "!difficulty":
+      modcmd(() => {
+        // if(["easy", "medium", "hard", "expert"].includes(splitmsg[1])) {
+          config.difficulty = splitmsg[1];
+          loadGame(config.currentGame, config.difficulty);
+          return `Changed difficulty to ${config.difficulty}, game restarted`
+        // }
+      });
+      break;
     case "!cmds":
       result = "Available commands are !t, !about, !latency, !group, !discord";
       break;
@@ -167,7 +205,23 @@ function onMessageHandler(target, context, msg, self) {
 function reset(target) {
   // TODO hush
   patterns = [];
-  twitch.say(target, "hold the phone, twitch-tidal has been reset");
+  twitch.say(target, "hold the phone, tidal-party has been reset");
 }
+
+function loadGame(game, difficulty="easy") {
+  //load game data
+  gameData = gamesObj[game];
+
+  // update ui
+  ui.game.set("name", game, "blue");
+  ui.game.set("rules", gameData.rules, "blue");
+  ui.game.set("difficulty", difficulty, "blue")
+  // update configuration
+
+  // run game functionality
+  if(gameData.run) gameData.run(difficulty);
+}
+
+
 
 exports.run = run
