@@ -1,10 +1,10 @@
 // local
 const { config } = require("../config/config.js");
 const { algorithms } = require("./algorithms.js");
-const { gamesObj } = require("./gamesObj.js");
 const tmi = require("tmi.js");
 const tidal = require("./tidal.js");
 const ui = require("./ui/ui.js");
+const games = require("./games.js");
 
 // the list of all active patterns
 let patterns = [];
@@ -12,8 +12,10 @@ let patterns = [];
 let groups = {};
 // the msg counter
 let totalmsgs = 0;
-// load default game data
-let gameData = gamesObj[config.currentGame];
+// load the sandbox (default)
+let currentGame = games.change("Sandbox");
+// id for the running games's interval
+let gameIntervalID = 0;
 
 const twitch = new tmi.Client(config.twitch);
 
@@ -40,17 +42,16 @@ const run = () => {
   ui.info.set("uptime", "00:00:00", "blue");
   ui.info.set("fav sample", "todo", "red");
   ui.info.set("msg count", "todo", "red");
+
   // update the uptime in the ui
   setInterval(() => {
     ui.info.set("uptime",
       `${new Date(process.uptime() * 1000).toISOString().substr(11, 8)}`,
       "white")
   }, 1000);
-
-  //set game stuff
-  ui.game.set("name", config.currentGame, "blue");
-  ui.game.set("rules", gameData.rules, "blue");
 }
+
+
 
 function handlePattern(user, msg) {
   // parse twitch message into object
@@ -59,31 +60,21 @@ function handlePattern(user, msg) {
     pattern: (msg = msg.substr(msg.indexOf(" ") + 1)),
   };
 
-  // don't use an algo that doesn't exist
-  if (config.algorithm < algorithms.length) {
-    // use an algorithm to update the list of active patterns
-    patterns = algorithms[config.algorithm](
-      latest,
-      patterns,
-      config.maxActivePatterns
-    );
+  patterns = currentGame.update(latest, patterns);
 
-    // create a string to prepend to each pattern. `X` gets
-    // replaced by the position of the pattern in the list,
-    // e.g. for the fourth pattern X = 4
-    const prepend = (config.expiration != 0)
-      ? `mortal X ${config.expiration} 1`
-      : `jumpIn' X 1`;
+  // create a string to prepend to each pattern. `X` gets
+  // replaced by the position of the pattern in the list,
+  // e.g. for the fourth pattern X = 4
+  const prepend = (config.expiration != 0)
+    ? `mortal X ${config.expiration} 1`
+    : `jumpIn' X 1`;
 
-    // send patterns to tidal
-    tidal.writePatterns(patterns, prepend);
-    ui.patterns.update(patterns);
+  // send patterns to tidal
+  tidal.writePatterns(patterns, prepend);
+  ui.patterns.update(patterns);
 
-    // console.log(patterns);
-    return `@${user}: ${msg}`;
-  } else {
-    return `no algorithm at index ${config.algorithm}, try a number less than ${algorithms.length}`;
-  }
+  // console.log(patterns);
+  return `@${user}: ${msg}`;
 }
 
 function onMessageHandler(target, context, msg, self) {
@@ -102,6 +93,7 @@ function onMessageHandler(target, context, msg, self) {
   // helper that executes f if user is a moderator or the broadcaster, otherwise set result
   // to an error message
   function modcmd(f) {
+    // TODO check broadcaster is deprecated?
     if (context.mod || context.badges.broadcaster) {
       result = f();
       return;
@@ -166,35 +158,31 @@ function onMessageHandler(target, context, msg, self) {
     case "!game":
       //this is a mod command so randos can't change the game at will
       modcmd(() => {
-        //check if games is in games list
-        if (gamesObj[splitmsg[1]]) {
-          reset(target);
-          //change configuration
-          config.currentGame = splitmsg[1];
-          loadGame(splitmsg[1]);
-          return `@${context.username} changed the game to ${config.currentGame}`
-        } else {
-          if (splitmsg[1] == undefined) {
-            //if game not supplied, restart
-            loadGame(config.currentGame, config.difficulty)
-            return `Game Restarted!`
-          }  else {
-            //if game isn't in the list
-            return `${splitmsg[1]} does not exist :(`
-          }
-        }
+        // TODO put back all of justin's safety checks
+        currentGame = games.change(splitmsg[1]);
+
+        clearInterval(gameIntervalID);
+        gameIntervalID = setInterval(() => {
+          // just run the game with the current patterns
+          // required to use timing in games
+          patterns = currentGame.loop(patterns);
+        }, currentGame.interval);
+
+        reset();
+        return `game changed to ${currentGame.title}`;
       });
       break;
     case "!difficulty":
       modcmd(() => {
         // if(["easy", "medium", "hard", "expert"].includes(splitmsg[1])) {
-          config.difficulty = splitmsg[1];
-          loadGame(config.currentGame, config.difficulty);
-          return `Changed difficulty to ${config.difficulty}, game restarted`
+        config.difficulty = splitmsg[1];
+        loadGame(config.currentGame, config.difficulty);
+        return `Changed difficulty to ${config.difficulty}, game restarted`
         // }
       });
       break;
     case "!cmds":
+      // TODO this isn't accurate... at all!
       result = "Available commands are !t, !about, !latency, !group, !discord";
       break;
   }
@@ -205,23 +193,8 @@ function onMessageHandler(target, context, msg, self) {
 function reset(target) {
   // TODO hush
   patterns = [];
+  ui.patterns.update(patterns);
   twitch.say(target, "hold the phone, tidal-party has been reset");
 }
-
-function loadGame(game, difficulty="easy") {
-  //load game data
-  gameData = gamesObj[game];
-
-  // update ui
-  ui.game.set("name", game, "blue");
-  ui.game.set("rules", gameData.rules, "blue");
-  ui.game.set("difficulty", difficulty, "blue")
-  // update configuration
-
-  // run game functionality
-  if(gameData.run) gameData.run(difficulty);
-}
-
-
 
 exports.run = run

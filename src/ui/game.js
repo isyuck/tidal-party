@@ -23,34 +23,31 @@ class Game {
     // this.node.pushLine("there is no game currently active :-(")
   }
 
-
-
-
   // update the state and color of an info line using it's title.
-    // this also updates the whole container. if a title matching
-    // the one passed isn't found, it gets added.
-    set(title, state, color) {
-        this.init();
-        // ignore blanks
-        if (title == "" || state == "" || color == "") { return }
-        // add by default
-        let newelem = true;
-        if (gameLines.length) {
-            for (let info of gameLines) {
-                // update info line, don't add
-                if (title == info.title) {
-                    info.state = state;
-                    info.color = color;
-                    newelem = false;
-                }
-                this.node.insertBottom(info.get())
-            }
+  // this also updates the whole container. if a title matching
+  // the one passed isn't found, it gets added.
+  set(title, state, color) {
+    this.init();
+    // ignore blanks
+    if (title == "" || state == "" || color == "") { return }
+    // add by default
+    let newelem = true;
+    if (gameLines.length) {
+      for (let info of gameLines) {
+        // update info line, don't add
+        if (title == info.title) {
+          info.state = state;
+          info.color = color;
+          newelem = false;
         }
-        if (newelem) {
-            gameLines.push(new GameLine(title, state, color));
-            this.node.insertBottom(gameLines[gameLines.length - 1].get())
-        }
+        this.node.insertBottom(info.get())
+      }
     }
+    if (newelem) {
+      gameLines.push(new GameLine(title, state, color));
+      this.node.insertBottom(gameLines[gameLines.length - 1].get())
+    }
+  }
 
 }
 
@@ -59,17 +56,17 @@ let gameLines = [];
 // contains a 'line' of info, e.g. connection and status,
 // and some formatting
 class GameLine {
-    constructor(_title, _state, _color) {
-        this.title = _title;
-        this.state = _state;
-        this.color = _color;
-    }
-    // return the formatted info
-    get() {
-        // it looks ugly..
-        return `${this.title}`.padEnd(14, ' ')
-            + `{bold}{${this.color}-fg}${this.state}{/${this.color}-fg}{/bold}`;
-    }
+  constructor(_title, _state, _color) {
+    this.title = _title;
+    this.state = _state;
+    this.color = _color;
+  }
+  // return the formatted info
+  get() {
+    // it looks ugly..
+    return `${this.title}`.padEnd(14, ' ')
+      + `{bold}{${this.color}-fg}${this.state}{/${this.color}-fg}{/bold}`;
+  }
 };
 
 module.exports = Game;

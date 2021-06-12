@@ -41,6 +41,8 @@ var aboutContainer = blessed.box({
 });
 
 var titleBox = blessed.box({
+    // this only works if started with `npm start`, e.g. `node server.js`
+    // won't have access to package.json
     content: ` {bold}tidal-party{/bold}  v${process.env.npm_package_version}`,
     tags: true,
     height: "shrink",
