@@ -3,12 +3,16 @@ I. games purely in TidalCycles
   b. jazz combo
     i. main section and solo section
   c. algorithmic etudes
-    d. equivalent patterns
-    e. function / type prompt
-    f. drumming exercises
-    g. given a phrase, generate a melody
+    i. equivalent patterns
+    ii. function / type prompt
+    iii. drumming exercises
+    iv. given a phrase, generate a melody
   d. score-a-poem
   e. tidalcycles course helper
+  f. games based on a few functions in tidal
+    i. fit
+    ii. lindenmeyer
+    iii. step/steps
 
 
 II. games where some users are not using Tidal
@@ -16,3 +20,11 @@ II. games where some users are not using Tidal
   b. fuck-the-sample
     i. make the stupidest thing you can make with a sample
     ii. comedy points
+
+
+tidal-battle
+  1. two teams
+  2. Automatic switching, so players can execute at any time and it doesn't affect flow
+  3. team highlighting in the gui
+  4. starts with 64 cycles per round and decreases until the tradeoff is 1 cycle each.  This decrease could be manual.
+  5. vote for winner
