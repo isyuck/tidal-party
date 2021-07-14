@@ -3,13 +3,13 @@ module.exports =
 
 It provides an interface to TidalCyles, a live coding environment and pattern language for musical composition and improvisation, from twitch.tv chat.
 
-To send a message to Tidal, type {inverse}!t s "bd cp hh sn"{/inverse} in the chat, and press enter.
-
-The {bold}bd{/bold} is a bass drum, the {bold}cp{/bold} is a clap, the {bold}hh{/bold} is a hihat, and the {bold}sn{/bold} is a snare.
+To send a message to Tidal, type {inverse}!t <YOUR PATTERN>{/inverse} in the chat, and press enter.
 
 Some ideas for patterns:
 
 {inverse}s "bd*4 cp*4"{/inverse}, {inverse}s "[sn hh]*2"{/inverse}, {inverse}s "hh(5,8)"{/inverse}, {inverse}s "[cp bd hh sn]/2"{/inverse}.
+
+The {bold}bd{/bold} is a bass drum, the {bold}cp{/bold} is a clap, the {bold}hh{/bold} is a hihat, and the {bold}sn{/bold} is a snare.
 
 More information about TidalCyles and how to use it can be found on its wiki, type {inverse}!wiki{/inverse} for a link.
 
