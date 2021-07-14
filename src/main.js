@@ -5,40 +5,80 @@ const tmi = require("tmi.js");
 const tidal = require("./tidal.js");
 const ui = require("./ui/ui.js");
 const games = require("./games.js");
+const commands = require("./cmds.js");
 
-// the list of all active patterns
-let patterns = [];
-// the group structure
-let groups = {};
-// the msg counter
-let totalmsgs = 0;
-// load the sandbox (default)
-let currentGame = games.change("Sandbox");
-// id for the running games's interval
-let gameIntervalID = 0;
+// represents the current 'state' of tidal-party, and
+// some functions for interfacing with other parts of it
+let state = {
+  // the list of all active patterns
+  patterns: [],
+  // load config by default
+  maxActivePatterns: config.maxActivePatterns,
+  // the group structure
+  groups: [],
+  // the current game
+  game: {
+    current: null,
+    intervalID: 0,
+    // change the game
+    changeTo: (title) => {
+
+      state.game.current = games.change(title);
+      clearInterval(state.game.intervalID);
+      state.game.intervalID = setInterval(() => {
+        // just run the game with the current patterns
+        // required to use timing in games
+        patterns = state.game.current.loop(state.patterns);
+      }, state.game.current.interval);
+
+      reset();
+    }
+  },
+  // the msg counter
+  totalmsgs: 0,
+  // run this when a change to state is made
+  update: () => {
+    // create a string to prepend to each pattern. `X` gets
+    // replaced by the position of the pattern in the list,
+    // e.g. for the fourth pattern X = 4
+    const prepend = (state.game.current.expiration != 0)
+      ? `mortal X ${state.game.current.expiration} 1`
+      : `jumpIn' X 1`;
+
+    // send patterns to tidal
+    tidal.writePatterns(state.patterns, prepend);
+    ui.patterns.update(state.patterns);
+    state.setUpdateFlag = false;
+
+    ui.render();
+  },
+}
 
 const twitch = new tmi.Client(config.twitch);
 
 const run = () => {
-  // update ui every 100ms
-  setInterval(() => ui.render(), 100);
 
-  // connect to twitch, start tidal, render ui
+  // load the sandbox (default)
+  state.game.current = games.change("Sandbox");
+
+  // connect to twitch, start tidal
   tidal.start();
   twitch.connect().catch()
-  ui.render();
 
-  twitch.on("connected", () => ui.info.set("connected", "true", "green"))
-  twitch.on("message", onMessageHandler)
+  twitch.on("connected", () => {
+    ui.info.set("connected", "true", "green")
+    ui.render();
+  });
+  twitch.on("message", onMessageHandler);
 
   // create & initialise info UI // TODO update when options are changed while running
   ui.info.set("connected", "false", "red");
   ui.info.set("channel", `${config.twitch.channels}`.replace("#", ""), "blue");
   ui.info.set("bot account", config.twitch.identity.username, "blue");
-  ui.info.set("max patterns", config.maxActivePatterns, "blue");
+  ui.info.set("max patterns", state.maxActivePatterns, "blue");
   ui.info.set("expiration", `${config.expiration} cycles`, "blue");
-  ui.info.set("algorithm", `${config.algorithm}`, "blue");
-  ui.info.set("total msgs", `${totalmsgs}`, "blue");
+
+  ui.info.set("total msgs", `${state.totalmsgs}`, "blue");
   ui.info.set("uptime", "00:00:00", "blue");
   ui.info.set("fav sample", "todo", "red");
   ui.info.set("msg count", "todo", "red");
@@ -48,152 +88,36 @@ const run = () => {
     ui.info.set("uptime",
       `${new Date(process.uptime() * 1000).toISOString().substr(11, 8)}`,
       "white")
+    ui.render();
   }, 1000);
-}
 
-
-
-function handlePattern(user, msg) {
-  // parse twitch message into object
-  const latest = {
-    user: user,
-    pattern: (msg = msg.substr(msg.indexOf(" ") + 1)),
-  };
-
-  patterns = currentGame.update(latest, patterns);
-
-  // create a string to prepend to each pattern. `X` gets
-  // replaced by the position of the pattern in the list,
-  // e.g. for the fourth pattern X = 4
-  const prepend = (config.expiration != 0)
-    ? `mortal X ${config.expiration} 1`
-    : `jumpIn' X 1`;
-
-  // send patterns to tidal
-  tidal.writePatterns(patterns, prepend);
-  ui.patterns.update(patterns);
-
-  // console.log(patterns);
-  return `@${user}: ${msg}`;
+  ui.render();
 }
 
 function onMessageHandler(target, context, msg, self) {
-
   // ignore messages from the bot
   if (self) {
     return;
+  } else {
+
+    // update the total messages
+    state.totalmsgs += 1;
+    ui.info.set("total msgs", `${state.totalmsgs}`, "blue");
+
+    // get the new state and a message from commands.run()
+    let result = commands.run(state, context, msg);
+    // update the state
+    state = result.state;
+    state.update();
+    // send a message (no message if result.message is empty)
+    twitch.say(target, result.output);
   }
-
-  totalmsgs += 1;
-  ui.info.set("total msgs", `${totalmsgs}`, "blue");
-
-  let result = "";
-  const splitmsg = msg.split(" ");
-
-  // helper that executes f if user is a moderator or the broadcaster, otherwise set result
-  // to an error message
-  function modcmd(f) {
-    // TODO check broadcaster is deprecated?
-    if (context.mod || context.badges.broadcaster) {
-      result = f();
-      return;
-    }
-    result = `@${context.username}, you cannot use this command because you are not a mod`;
-  }
-
-  switch (splitmsg[0]) {
-    case "!t":
-      // handle a tidal pattern
-      result = handlePattern(context.username, msg);
-      break;
-    case "!u":
-      // same as !t but with username as argument (for multiuser debug/testing by mods only)
-      // e.g. `!u kuhn msg` to pretend to be the user @kuhn
-      modcmd(() => {
-        const user = splitmsg.splice(1, 1);
-        return handlePattern(user.join(" "), splitmsg.join(" "));
-      });
-      break;
-    case "!maxpat":
-      // change the max active patterns
-      modcmd(() => {
-        config.maxActivePatterns = splitmsg[1];
-        return `@${context.username} changed the maximum active patterns to ${config.maxActivePatterns}`;
-      });
-      break;
-    case "!algo":
-      // switch the current algorithm
-      modcmd(() => {
-        config.algorithm = splitmsg[1];
-        return `@${context.username} switched to algorithm[${config.algorithm}]`;
-      });
-      break;
-    //help if user wants to check latency
-    case "!latency":
-      result = `You can check your Latency to Broadcaster and Latency Mode (along with a number of other stats) by toggling Video Stats under the Advanced menu on the Settings icon on the bottom right hand corner of the video player.`;
-      break;
-    case "!about":
-      result = "https://github.com/isyuck/tidal-party";
-      break;
-    case "!expire":
-      modcmd(() => {
-        if (splitmsg[1] >= 0) config.expiration = splitmsg[1];
-        console.log(config.expiration);
-        reset(target);
-        return `@${context.username} changed the expiration to ${config.expiration}`;
-      });
-      break;
-    case "!group":
-      if (!splitmsg[1]) {
-        result = `@${context.username} please specify a group name.`;
-        break;
-      }
-      groups[context.username] = splitmsg[1];
-      result = `@${context.username} joined group ${splitmsg[1]}`;
-      console.log(groups);
-      break;
-    case "!discord":
-      result = "https://discord.gg/2B6MUbBNvN";
-      break;
-    case "!game":
-      //this is a mod command so randos can't change the game at will
-      modcmd(() => {
-        // TODO put back all of justin's safety checks
-        currentGame = games.change(splitmsg[1]);
-
-        clearInterval(gameIntervalID);
-        gameIntervalID = setInterval(() => {
-          // just run the game with the current patterns
-          // required to use timing in games
-          patterns = currentGame.loop(patterns);
-        }, currentGame.interval);
-
-        reset();
-        return `game changed to ${currentGame.title}`;
-      });
-      break;
-    case "!difficulty":
-      modcmd(() => {
-        // if(["easy", "medium", "hard", "expert"].includes(splitmsg[1])) {
-        config.difficulty = splitmsg[1];
-        loadGame(config.currentGame, config.difficulty);
-        return `Changed difficulty to ${config.difficulty}, game restarted`
-        // }
-      });
-      break;
-    case "!cmds":
-      // TODO this isn't accurate... at all!
-      result = "Available commands are !t, !about, !latency, !group, !discord";
-      break;
-  }
-
-  twitch.say(target, result);
 }
 
 function reset(target) {
   // TODO hush
   patterns = [];
-  ui.patterns.update(patterns);
+  state.update();
   twitch.say(target, "hold the phone, tidal-party has been reset");
 }
 

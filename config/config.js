@@ -20,7 +20,5 @@ exports.config = {
   maxActivePatterns: 8,
   algorithm: 0,
   expiration: 8,
-  safeTidal: true,
-  currentGame: "Sandbox",
-  difficulty: "easy"
+  safeTidal: false,
 }

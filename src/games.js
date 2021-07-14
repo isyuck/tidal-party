@@ -46,7 +46,7 @@ exports.change = (gameName) => {
   // resort to game[0] by default
   // TODO notify user their game couldn't be found, and keep
   // the currently active game active
-  let currentGame;
+  let currentGame = games[0];
   for (let game of games) {
     if (game.title.toLowerCase() == gameName.toLowerCase()) {
       currentGame = game;
