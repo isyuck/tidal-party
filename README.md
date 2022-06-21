@@ -2,6 +2,8 @@
 
 tidal-party is an experiment in collaborative music and game design.
 
+![img](./img.png)
+
 tidal-party provides a interface to [TidalCycles](https://tidalcycles.org/Welcome) from twitch.tv chat, allowing large numbers of users to send patterns to a remote Tidal instance. It also exposes moderator-level commands to algorithmically manipulate how patterns get added and removed. _(Work in progress)_
 
 It's a great way for a group of people to start learning Tidal without having to install anything (other than a web browser!). Once the host is up and running, all you have to do is send folks a twitch.tv link and you're good to go.
